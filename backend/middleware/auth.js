@@ -1,15 +1,10 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const express = require("express");
+const { registerUser, loginUser, logoutUser } = require("../controllers/authController");
 
-module.exports = (req, res, next) => {
-  const token = req.header("Authorization");
-  if (!token) return res.status(401).json({ message: "Access Denied" });
+const router = express.Router();
 
-  try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    next();
-  } catch (error) {
-    res.status(400).json({ message: "Invalid Token" });
-  }
-};
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.post("/logout", logoutUser);
+
+module.exports = router;
