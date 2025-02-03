@@ -163,6 +163,50 @@ class MemberController{
             return getResponseJson(res, 200, "Book borrowed successfully.");
         }
     }
+
+    static async returnBook(req,res){
+        const user_id = req.body.user_id;
+        const book_id = req.body.book_id;
+
+        if (!user_id || !book_id) {
+            return getResponseJson(res, 400, "Please try again.");
+        }
+
+        if(user_id!='' && book_id!='')
+        {
+            const [borrowed] = await db.query(
+                "SELECT due_date FROM borrowed_books WHERE user_id = ? AND book_id = ? AND returned_at IS NULL",
+                [user_id, book_id]
+            );
+            
+            if (borrowed.length === 0) {
+                return getResponseJson(res, 400, "You have not borrowed this book.");
+            }
+
+            const dueDate = new Date(borrowed[0].due_date);
+            const returnDate = new Date();
+            let fine = 0;
+
+            if (returnDate > dueDate) {
+                const daysLate = Math.ceil((returnDate - dueDate) / (1000 * 60 * 60 * 24));
+                fine = daysLate * 2; 
+            }
+
+            await db.query(
+                "UPDATE borrowed_books SET returned_at = NOW(), fine = ?, paid = ?, modified_time = NOW() WHERE user_id = ? AND book_id = ?",
+                [fine, fine === 0, user_id, book_id]
+            );
+
+            await db.query("UPDATE books SET available_copies = available_copies + 1 WHERE id = ?", [book_id]);
+
+            return getResponseJson(res, 200, `Book returned successfully. ${fine > 0 ? `Fine: $${fine}` : ''}`);
+        }
+        else
+        {
+            return getResponseJson(res, 400, "Please try again.");
+        }
+
+    }
 }
 
 module.exports = MemberController;
