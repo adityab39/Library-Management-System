@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const db = require("./config/db"); 
 const authRoutes = require("./routes/auth"); 
+const memberRoutes = require("./routes/member");
 
 dotenv.config();
 const app = express();
@@ -16,10 +17,11 @@ db.getConnection()
   .catch((err) => console.error("Database Connection Failed:", err));
 
 app.use("/api/auth", authRoutes); 
+app.use("/api/member", memberRoutes);
 
 
 app.get("/", (req, res) => {
-  res.send("📚 Library Management System API is running...");
+  res.send("Library Management System API is running...");
 });
 
 const PORT = process.env.PORT || 3000;
