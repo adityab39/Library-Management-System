@@ -124,7 +124,7 @@ class MemberController{
     }
 
     static async borrowBook(req,res){
-        const user_id = req.body.user_id;
+        const user_id = req.user.id;
         const book_id = req.body.book_id;
 
         if (!user_id || !book_id) {
@@ -137,6 +137,17 @@ class MemberController{
                 "SELECT COUNT(id) AS borrowed_count FROM borrowed_books WHERE user_id = ? and returned_at IS NULL",[user_id]);
             if(borrowed_books[0].borrowed_count >=5){
                 return getResponseJson(res,400,"You cannot borrow more than 5 books.");
+            }
+
+            const [fineResult] = await db.query(
+                "SELECT SUM(fine) AS total_fine FROM borrowed_books WHERE user_id = ? AND fine > 0 AND paid = FALSE",
+                [user_id]
+            );
+    
+            const totalFine = fineResult[0].total_fine || 0;
+    
+            if (totalFine > 0) {
+                return getResponseJson(res, 400, `You have an unpaid fine of $${totalFine}. Please pay before borrowing.`);
             }
 
             const [already_borrowed] = await db.query(
@@ -165,7 +176,7 @@ class MemberController{
     }
 
     static async returnBook(req,res){
-        const user_id = req.body.user_id;
+        const user_id = req.user.id;
         const book_id = req.body.book_id;
 
         if (!user_id || !book_id) {
@@ -228,6 +239,61 @@ class MemberController{
         }
 
         return getResponseJson(res,200,"Borrowed books retrieved successfully.",books);
+    }
+
+    static async borrowingHistory(req,res){
+        const user_id = req.user.id;
+
+        if(!user_id){
+            return getResponseJson(res,500,"Please try again.");
+        }
+
+        const [history] = await db.query(`
+            SELECT 
+                b.id AS book_id, 
+                b.title, 
+                b.author, 
+                bb.borrowed_at, 
+                bb.due_date, 
+                bb.returned_at, 
+                bb.fine 
+             FROM borrowed_books bb
+             JOIN books b ON bb.book_id = b.id
+             WHERE bb.user_id = ?
+             ORDER BY bb.borrowed_at DESC `,[user_id]);
+        
+        if(history.length == 0){
+            return getResponseJson(res,400,"No borrowing history");
+        }
+
+        return getResponseJson(res,200,"Borrowing history retrieved successfully.",history);
+    }
+
+    static async reviewBook(req,res){
+        const user_id = req.user.id;
+        const book_id = req.body.book_id;
+        const rating = req.body.rating;
+        const review = req.body.review;
+
+        if(!user_id){
+            return getResponseJson(res,500,"Please try again.");
+        }
+
+        const [borrowed] = await db.query(
+            "SELECT id FROM borrowed_books WHERE user_id = ? AND book_id = ? AND returned_at IS NOT NULL",
+            [user_id, book_id]
+        );
+        
+        if (borrowed.length === 0) {
+            return getResponseJson(res, 400, "You can only review books that you have borrowed and returned.");
+        }
+
+        await db.query(
+            "INSERT INTO book_reviews (user_id, book_id, rating, review) VALUES (?, ?, ?, ?)",
+            [user_id, book_id, rating, review]
+        );
+
+        return getResponseJson(res, 200, "Review submitted successfully.");
     }
 }
 
