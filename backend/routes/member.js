@@ -8,6 +8,6 @@ router.get("/books",MemberController.getAllBooks);
 router.get("/books/search", MemberController.searchBooks);
 router.post("/books/borrow",MemberController.borrowBook);
 router.post("/books/return",MemberController.returnBook);
-
+router.get("/books/borrowed",verifyToken,MemberController.getBorrowedbooks);
 
 module.exports = router; 

@@ -208,6 +208,27 @@ class MemberController{
 
     }
 
+    static async getBorrowedbooks(req,res)
+    {
+        const user_id = req.user?.id;
+        const [books] = await db.query(`
+            SELECT 
+                b.id AS book_id, 
+                b.title, 
+                b.author, 
+                bb.due_date, 
+                bb.fine 
+             FROM borrowed_books bb
+             JOIN books b ON bb.book_id = b.id
+             WHERE bb.user_id = ? AND bb.returned_at IS NULL`,[user_id]);
+        
+            
+        if(books.length == 0){
+            return getResponseJson(res,400,"You have no borrowed books");
+        }
+
+        return getResponseJson(res,200,"Borrowed books retrieved successfully.",books);
+    }
 }
 
 module.exports = MemberController;
