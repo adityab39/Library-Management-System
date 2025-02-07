@@ -100,6 +100,27 @@ class AdminController{
         });
     }
 
+    static async deleteBook(req,res){
+        const { bookId } = req.params;
+
+        if (!bookId) {
+            return getResponseJson(res, 400, "Book ID is required.");
+        }
+        
+        const [book] = await db.query("SELECT id, cover_image FROM books WHERE id = ?", [bookId]);
+        if (book.length === 0) {
+            return getResponseJson(res, 404, "Book not found.");
+        }
+
+        if (book[0].cover_image) {
+            fs.unlink(book[0].cover_image, (err) => {
+                if (err) console.error("Error deleting image:", err);
+            });
+        }
+        await db.query("DELETE FROM books WHERE id = ?", [bookId]);
+        return getResponseJson(res, 200, "Book deleted successfully.");
+    }
+
 }
 
 module.exports = AdminController;
