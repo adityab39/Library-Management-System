@@ -73,15 +73,17 @@ class AdminController{
 
         let updateCoverImageQuery = "";
         let updateCoverImageParams = [];
+        let newCoverImagePath = book[0].cover_image; 
+
 
         if (req.file) {
-            const newCoverImagePath = `uploads/books/${req.file.filename}`;
+            newCoverImagePath = `uploads/books/${req.file.filename}`;
             if (book[0].cover_image) {
                 fs.unlink(book[0].cover_image, (err) => {
                     if (err) console.error("Error deleting old image:", err);
                 });
             }
-            
+    
             updateCoverImageQuery = ", cover_image = ?";
             updateCoverImageParams.push(newCoverImagePath);
         }
@@ -91,7 +93,11 @@ class AdminController{
             [title, author, category, publication_year, isbn, language, total_copies, description, available_copies, ...updateCoverImageParams, bookId]
         );
 
-        return getResponseJson(res, 200, "Book updated successfully.");
+        return getResponseJson(res, 200, "Book updated successfully.", {
+            bookId,
+            title,
+            cover_image: updateCoverImageParams.length > 0 ? `http://localhost:3000/${newCoverImagePath}` : book[0].cover_image
+        });
     }
 
 }
