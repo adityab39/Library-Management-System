@@ -101,26 +101,60 @@ class AdminController{
     }
 
     static async deleteBook(req,res){
-        const { bookId } = req.params;
-
+        const bookId = req.body.bookId;
         if (!bookId) {
             return getResponseJson(res, 400, "Book ID is required.");
         }
-        
+
         const [book] = await db.query("SELECT id, cover_image FROM books WHERE id = ?", [bookId]);
         if (book.length === 0) {
             return getResponseJson(res, 404, "Book not found.");
         }
 
-        if (book[0].cover_image) {
-            fs.unlink(book[0].cover_image, (err) => {
-                if (err) console.error("Error deleting image:", err);
-            });
-        }
-        await db.query("DELETE FROM books WHERE id = ?", [bookId]);
+        await db.query("UPDATE books SET is_active = 0 WHERE id = ?", [bookId]);
         return getResponseJson(res, 200, "Book deleted successfully.");
     }
 
+    static async getBooks(req, res){
+        const { page = 1, status } = req.query; 
+        const limit = 10;
+        const offset = (page - 1) * limit;
+
+        let query = "SELECT * FROM books";
+        let params = [];
+
+        if (status !== undefined) {
+            query += " WHERE is_active = ?";
+            params.push(status);
+        }
+
+        query += " LIMIT ? OFFSET ?";
+        params.push(limit, offset);
+
+        const [books] = await db.query(query, params);
+
+        if (books.length === 0) {
+            return getResponseJson(res, 404, "No books found.");
+        }
+        
+        const formattedBooks = books.map(book => ({
+            ...book,
+            cover_image: book.cover_image ? `http://localhost:3000/${book.cover_image}` : null
+        }));
+
+        const [countResult] = await db.query("SELECT COUNT(*) as total FROM books");
+        const totalBooks = countResult[0].total;
+        const totalPages = Math.ceil(totalBooks / limit);
+
+        return getResponseJson(res, 200, "Books retrieved successfully.", {
+            page,
+            limit,
+            totalBooks,
+            totalPages,
+            books: formattedBooks
+        });
+
+    }
 }
 
 module.exports = AdminController;
