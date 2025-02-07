@@ -206,6 +206,28 @@ class AdminController{
             borrowedBooks
         });
     }
+
+    static async restoreBook(req, res){
+        const bookId = req.body.bookId;
+        if (!bookId) {
+            return getResponseJson(res, 400, "Book ID is required.");
+        }
+
+        const [already_active] = await db.query("SELECT id FROM books WHERE id = ? and is_active = 1");
+
+        if(already_active.length > 0){
+            return getResponseJson(res, 400, "Book is already active.");
+        }
+
+        const [book] = await db.query("SELECT id FROM books WHERE id = ?", [bookId]);
+        if (book.length === 0) {
+            return getResponseJson(res, 404, "Book not found.");
+        }
+
+        await db.query("UPDATE books SET is_active = 1 WHERE id = ?", [bookId]);
+
+        return getResponseJson(res, 200, "Book restored successfully.");
+    }
 }
 
 module.exports = AdminController;
