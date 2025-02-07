@@ -16,7 +16,7 @@ class AdminController{
         const language = req.body.language;
 
 
-        if (!title || !author || !category || !total_copies || !available_copies || !publication_year || !isbn || !language) {
+        if (!title || !author || !category || !total_copies || !available_copies || !publication_year || !isbn || !language || !description) {
             return getResponseJson(res, 400, "All fields are required.");
         }
 
@@ -40,7 +40,10 @@ class AdminController{
         return getResponseJson(res, 200, "Book added successfully.", { title, cover_image });
 
     }
+
 }
+
+module.exports = AdminController;
 
 
 

@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const db = require("./config/db"); 
 const authRoutes = require("./routes/auth"); 
 const memberRoutes = require("./routes/member");
+const adminRoutes = require("./routes/admin");
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ db.getConnection()
 
 app.use("/api/auth", authRoutes); 
 app.use("/api/member", memberRoutes);
+app.use("/api/admin", adminRoutes);
 
 
 app.get("/", (req, res) => {
