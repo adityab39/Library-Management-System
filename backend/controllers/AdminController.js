@@ -155,6 +155,57 @@ class AdminController{
         });
 
     }
+
+    static async getBorrowedBooks(req,res){
+        const { page = 1, status } = req.query; 
+        const limit = 10;
+        const offset = (page - 1) * limit;
+
+        let query = `
+        SELECT 
+            b.id AS book_id, 
+            b.title, 
+            b.author, 
+            u.id AS user_id, 
+            u.name AS member_name, 
+            u.email, 
+            bb.id AS borrowed_id,
+            bb.due_date, 
+            bb.returned_at, 
+            bb.fine, 
+            bb.paid 
+        FROM borrowed_books bb
+        JOIN books b ON bb.book_id = b.id
+        JOIN users u ON bb.user_id = u.id`;
+
+        let params = [];
+        if (status === "returned") {
+            query += " WHERE bb.returned_at IS NOT NULL";
+        } else if (status === "pending") {
+            query += " WHERE bb.returned_at IS NULL";
+        }
+
+        query += " LIMIT ? OFFSET ?";
+        params.push(limit, offset);
+
+        const [borrowedBooks] = await db.query(query, params);
+
+        if (borrowedBooks.length === 0) {
+            return getResponseJson(res, 404, "No borrowed books found.");
+        }
+
+        const [countResult] = await db.query("SELECT COUNT(*) as total FROM borrowed_books");
+        const totalBorrowed = countResult[0].total;
+        const totalPages = Math.ceil(totalBorrowed / limit);
+
+        return getResponseJson(res, 200, "Borrowed books retrieved successfully.", {
+            page,
+            limit,
+            totalBorrowed,
+            totalPages,
+            borrowedBooks
+        });
+    }
 }
 
 module.exports = AdminController;

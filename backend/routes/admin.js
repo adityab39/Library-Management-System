@@ -9,6 +9,7 @@ router.post("/add-book", verifyToken, upload.single("cover_image"), AdminControl
 router.put("/update-book/:bookId", verifyToken, upload.single("cover_image"), AdminController.updateBook);
 router.post("/delete-book", verifyToken, AdminController.deleteBook);
 router.get("/get-books", verifyToken, AdminController.getBooks);
+router.get("/borrowed-books", verifyToken, AdminController.getBorrowedBooks);
 
 module.exports = router;
 
