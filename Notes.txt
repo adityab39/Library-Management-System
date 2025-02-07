@@ -1,0 +1,6 @@
+ Borrow a Book	borrowBook()	POST /api/member/books/borrow
+✅ Return a Book & Apply Fines	returnBook()	POST /api/member/books/return
+✅ Check Borrowed Books	getBorrowedBooks()	GET /api/member/books/borrowed
+✅ View Borrowing History	borrowingHistory()	GET /api/member/books/history
+✅ Pay Fine Before Borrowing	payFine()	POST /api/member/books/pay-fine
+✅ Rate & Review Books	addBookReview()	POST /api/member/books/review
