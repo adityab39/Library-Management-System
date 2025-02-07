@@ -2,15 +2,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 const crypto = require("crypto");
-const twilio = require("twilio");
 const nodemailer = require("nodemailer");
 const getResponseJson = require("../utils/responseHelper");
 
-
-const twilioClient = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
 
 class AuthController{
     static async register(req,res){
