@@ -14,6 +14,7 @@ router.post("/restore-book", verifyToken, AdminController.restoreBook);
 router.get("/members",verifyToken,AdminController.getAllMembers);
 router.post("/delete-member",verifyToken,AdminController.deleteMember);
 router.get("/stats", verifyToken, AdminController.getLibraryStats);
+router.get("/send-due-reminders", verifyToken, AdminController.sendDueBookNotifications);
 
 
 module.exports = router;

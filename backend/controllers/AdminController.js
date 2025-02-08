@@ -1,7 +1,7 @@
 const express = require("express");
 const db = require("../config/db");
 const getResponseJson = require("../utils/responseHelper");
- 
+const sendMail = require("../config/email");
 
 class AdminController{
     static async addBook(req,res){
@@ -299,6 +299,39 @@ class AdminController{
             return getResponseJson(res, 500, "Error fetching library stats.", error);
         }
     }
+
+    static async sendDueBookNotifications(req, res) {
+        try {
+            const [dueUsers] = await db.query(
+                `SELECT u.id AS user_id, u.email, u.name, b.title, bb.due_date 
+                FROM borrowed_books bb
+                JOIN books b ON bb.book_id = b.id
+                JOIN users u ON bb.user_id = u.id
+                WHERE bb.returned_at IS NULL 
+                AND bb.due_date = DATE_ADD(CURDATE(), INTERVAL 1 DAY)`
+            );
+
+            if (dueUsers.length === 0) {
+                return getResponseJson(res, 200, "No due book notifications.");
+            }
+
+            for (const user of dueUsers) {
+                const subject = "Library Reminder: Book Due Tomorrow!";
+                const text = `Dear ${user.name},\n\n` +
+                            `Reminder: The book **"${user.title}"** is due tomorrow (${user.due_date}). ` +
+                            `Please return it on time to avoid late fees.\n\n` +
+                            `Thank you!\nLibrary Management System`;
+
+                await sendMail(user.email, subject, text);
+            }
+
+            return getResponseJson(res, 200, "Due book notification emails sent.");
+
+        } catch (error) {
+            return getResponseJson(res, 500, "Error sending due book notifications.", error);
+        }
+    }
+
 }
 
 module.exports = AdminController;
