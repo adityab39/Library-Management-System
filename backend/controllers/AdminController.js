@@ -228,6 +228,32 @@ class AdminController{
 
         return getResponseJson(res, 200, "Book restored successfully.");
     }
+
+    static async getAllMembers(req,res){
+        const { page = 1, limit = 10 } = req.query; 
+        const offset = (page - 1) * limit;
+
+        const [members] = await db.query(
+            "SELECT id, name, email, mobile, role, created_at FROM users WHERE role = 'member' LIMIT ? OFFSET ?",
+            [parseInt(limit), parseInt(offset)]
+        );
+
+        if(members.length == 0){
+            return getResponseJson(res,400,"No members found.");
+        }
+
+        const [countResult] = await db.query("SELECT COUNT(*) as total FROM users WHERE role = 'member'");
+        const totalMembers = countResult[0].total;
+        const totalPages = Math.ceil(totalMembers / limit);
+
+        return getResponseJson(res, 200, "Members retrieved successfully.", {
+            page,
+            limit,
+            totalMembers,
+            totalPages,
+            members
+        });
+    }
 }
 
 module.exports = AdminController;
