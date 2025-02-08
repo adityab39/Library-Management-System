@@ -37,16 +37,16 @@ class AuthController{
     }
 
     static async login(req,res){
-        const email = req.body.email?.trim(); 
+        const username = req.body.username?.trim(); 
         const password = req.body.password;
 
         if(password == ""){
             return getResponseJson(res,400,"Please Enter Password");
         }
 
-        if(email!= "" && password!=""){
+        if(username!= "" && password!=""){
             const [rows] = await db.query(
-                "SELECT * FROM users WHERE (email = ? or mobile = ?)",[email,email]);
+                "SELECT * FROM users WHERE (email = ? or mobile = ?)",[username,username]);
 
             if(rows.length == 0){
                 return getResponseJson(res, 400, "User not registered. Please register first");
