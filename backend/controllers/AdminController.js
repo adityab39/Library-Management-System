@@ -273,6 +273,32 @@ class AdminController{
         
         return getResponseJson(res,200,"Member deactivated successfully");
     }
+
+    static async getLibraryStats(req, res) {
+        try {
+            const [totalBooksResult] = await db.query("SELECT COUNT(*) as totalBooks FROM books");
+            const totalBooks = totalBooksResult[0].totalBooks;
+    
+            const [borrowedBooksResult] = await db.query("SELECT COUNT(*) as borrowedBooks FROM borrowed_books WHERE returned_at IS NULL");
+            const borrowedBooks = borrowedBooksResult[0].borrowedBooks;
+    
+            const [activeMembersResult] = await db.query("SELECT COUNT(*) as activeMembers FROM users WHERE role = 'member' AND is_active = 1");
+            const activeMembers = activeMembersResult[0].activeMembers;
+    
+            const [deactivatedMembersResult] = await db.query("SELECT COUNT(*) as deactivatedMembers FROM users WHERE role = 'member' AND is_active = 0");
+            const deactivatedMembers = deactivatedMembersResult[0].deactivatedMembers;
+    
+            return getResponseJson(res, 200, "Library stats retrieved successfully.", {
+                totalBooks,
+                borrowedBooks,
+                activeMembers,
+                deactivatedMembers
+            });
+    
+        } catch (error) {
+            return getResponseJson(res, 500, "Error fetching library stats.", error);
+        }
+    }
 }
 
 module.exports = AdminController;

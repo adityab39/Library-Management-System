@@ -12,7 +12,8 @@ router.get("/get-books", verifyToken, AdminController.getBooks);
 router.get("/borrowed-books", verifyToken, AdminController.getBorrowedBooks);
 router.post("/restore-book", verifyToken, AdminController.restoreBook);
 router.get("/members",verifyToken,AdminController.getAllMembers);
-router.post("/delete-member",verifyToken,AdminController.deleteMember)
+router.post("/delete-member",verifyToken,AdminController.deleteMember);
+router.get("/stats", verifyToken, AdminController.getLibraryStats);
 
 
 module.exports = router;
