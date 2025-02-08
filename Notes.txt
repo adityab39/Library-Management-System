@@ -14,8 +14,6 @@ Function Name	HTTP Method & Endpoint	Purpose
 ✏️ Edit Book Details	updateBook()	PUT /api/admin/books/:book_id	Update book information (title, author, category, copies)
 ❌ Remove a Book	deleteBook()	DELETE /api/admin/books/:book_id	Remove a book from the system
 🔍 View All Borrowed Books	getAllBorrowedBooks()	GET /api/admin/borrowed-books	View books borrowed by all members
-🚫 Force Return Book	forceReturnBook()	PUT /api/admin/books/return/:book_id	Mark a book as returned manually
-💰 Manage Fines	manageFines()	PUT /api/admin/members/:user_id/fine	Manually update member fines (waive or add fine)
 👥 View All Members	getAllMembers()	GET /api/admin/members	View list of all registered members
 ❌ Remove Member	deleteMember()	DELETE /api/admin/members/:user_id	Remove a member from the system
 📊 View Library Stats	getLibraryStats()	GET /api/admin/stats	Get total books, borrowed books, active members, etc.
