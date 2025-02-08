@@ -254,6 +254,25 @@ class AdminController{
             members
         });
     }
+
+    static async deleteMember(req,res){
+        const user_id = req.body.user_id;
+
+        if(!user_id){
+            return getResponseJson(res,400,"Please try again");
+        }
+
+        const [check_user] = await db.query("SELECT id FROM users WHERE id=?",[user_id]);
+        if(check_user.length == 0){
+            return getResponseJson(res,400,"Member not found.");
+        }
+
+        await db.query(`UPDATE users
+                        SET is_active = 0
+                        WHERE id = ?`,[user_id]);
+        
+        return getResponseJson(res,200,"Member deactivated successfully");
+    }
 }
 
 module.exports = AdminController;
