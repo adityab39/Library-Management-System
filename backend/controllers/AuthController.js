@@ -51,6 +51,10 @@ class AuthController{
             if(rows.length == 0){
                 return getResponseJson(res, 400, "User not registered. Please register first");
             }
+            const is_active = rows[0].is_active;
+            if(is_active === 0){
+                return getResponseJson(res,400,"Your account has been deactivated. Please contact the administrator.")
+            }
             const user = rows[0];
             const isValidPassword = await bcrypt.compare(password,user.password);
             if(!isValidPassword){
