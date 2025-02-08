@@ -7,10 +7,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* ✅ Redirect from "/" to "/login" */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* ✅ Define Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/logout" element={<Logout />} /> 

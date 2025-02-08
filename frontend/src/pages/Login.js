@@ -43,21 +43,16 @@ function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      {/* Login Card */}
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-        {/* Logo */}
         <div className="flex justify-center mb-4">
           <img src="/logo.png" alt="Library Logo" className="w-20 h-20" />
         </div>
 
-        {/* Title */}
         <h2 className="text-center text-xl font-bold text-gray-900 mb-4">
           Log in to Library Management
         </h2>
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Mobile or Email Input */}
           <div>
             <input
               type="text"
@@ -71,7 +66,6 @@ function Login() {
             {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
           </div>
 
-          {/* Password Input */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -92,20 +86,17 @@ function Login() {
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
-          {/* Login Button */}
           <button type="submit" className="w-full p-3 bg-purple-700 text-white rounded-md font-bold">
             🔒 Log in
           </button>
         </form>
 
-        {/* Forgot Password */}
         <div className="text-center mt-4">
           <a href="#" className="text-sm text-purple-600 hover:underline">
             Forgot Password?
           </a>
         </div>
 
-        {/* Signup Option */}
         <div className="text-center mt-2">
           <p className="text-sm text-gray-700">
             Don't have an account?{" "}
@@ -115,7 +106,6 @@ function Login() {
           </p>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-xs text-gray-500 mt-4">
           By logging in, you agree to our{" "}
           <a href="#" className="font-bold text-purple-700">Privacy Policy</a> and{" "}
