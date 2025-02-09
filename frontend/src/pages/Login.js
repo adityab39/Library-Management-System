@@ -21,18 +21,27 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     try {
       const response = await axios.post("http://localhost:3000/api/auth/login", {
         username,
         password,
       });
-
+  
       if (response.data.message === "Login successfull") { 
-        if (response.data.data.token) {
-          localStorage.setItem("token", response.data.data.token);
+        const { token, user } = response.data.data; // Extract token and user
+  
+        if (token) {
+          localStorage.setItem("token", token);
+          localStorage.setItem("role_id", user.role_id); // Store role_id
         }
-        navigate("/dashboard");
+  
+        // ✅ Redirect based on role_id
+        if (user.role_id === 2) {
+          navigate("/member-dashboard"); // Member goes to Member Dashboard
+        } else {
+          navigate("/dashboard"); // Admin goes to Admin Dashboard
+        }
       } else {
         alert("Invalid credentials");
       }
