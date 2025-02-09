@@ -29,18 +29,18 @@ function Login() {
       });
   
       if (response.data.message === "Login successfull") { 
-        const { token, user } = response.data.data; // Extract token and user
-  
+        const { token, user } = response.data.data; 
+        const userData = response.data.data.user;
         if (token) {
           localStorage.setItem("token", token);
-          localStorage.setItem("role_id", user.role_id); // Store role_id
+          localStorage.setItem("role_id", user.role_id); 
+          localStorage.setItem("user", JSON.stringify(userData));
         }
   
-        // ✅ Redirect based on role_id
         if (user.role_id === 2) {
-          navigate("/member-dashboard"); // Member goes to Member Dashboard
+          navigate("/member-dashboard"); 
         } else {
-          navigate("/dashboard"); // Admin goes to Admin Dashboard
+          navigate("/dashboard"); 
         }
       } else {
         alert("Invalid credentials");
