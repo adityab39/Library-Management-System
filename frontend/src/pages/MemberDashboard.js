@@ -75,7 +75,7 @@ function MemberDashboard() {
 
             <div className="flex-1 flex flex-col">
                 <header className="flex justify-between items-center bg-gradient-to-r from-purple-700 to-purple-400 text-white p-4 shadow w-full absolute left-0 top-0 h-16">
-                    <h1 className="text-xl font-semibold ml-5">Dah</h1>
+                    <h1 className="text-xl font-semibold ml-5">Dashboard</h1>
                     <div className="relative mr-5">
                         <button
                             className="flex items-center space-x-2 text-white hover:text-gray-200"
@@ -96,7 +96,6 @@ function MemberDashboard() {
 
                 {activeTab === "books" && (
                     <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
-                        <h2 className="text-2xl font-semibold mb-4">All Books</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {books.length > 0 ? (
                                 books.map((book) => (
