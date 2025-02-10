@@ -99,15 +99,19 @@ function MemberDashboard() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {books.length > 0 ? (
                                 books.map((book) => (
-                                <div 
+                                    <div 
                                     key={book.id} 
-                                    className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between h-full"
-                                >
+                                      className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between h-full  
+             transform transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+                                    >
                                     <img 
-                                    src={`http://localhost:3000/uploads/books/${book.coverImage}`} 
-                                    alt={book.title} 
-                                    crossOrigin="anonymous"
-                                    className="w-full h-48 object-cover rounded-t-lg" 
+                                        src={book.cover_image}
+                                        alt={book.title} 
+                                        crossOrigin="anonymous"
+                                        className="w-full h-48 object-contain rounded-t-lg"  
+                                        onError={(e) => { 
+                                            e.target.src = "/default-book-cover.jpg"; 
+                                        }}
                                     />
                                     <div className="p-4 flex flex-col flex-grow">
                                     <h2 className="font-bold text-lg">{book.title}</h2>
