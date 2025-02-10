@@ -10,6 +10,7 @@ function MemberDashboard() {
     const [books, setBooks] = useState([]);
     const [userId, setUserId] = useState(null);
     const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") || "books");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -29,6 +30,22 @@ function MemberDashboard() {
             fetchBooks(userId);
         }
     }, [userId, activeTab]);
+
+    const searchBooks = async (query) => {
+        if (!query.trim()) {
+            fetchBooks(userId); 
+            return;
+        }
+    
+        try {
+            const apiUrl = `http://localhost:3000/api/member/books/search?user_id=${userId}&title=${query}`;
+            const response = await axios.get(apiUrl);
+            setBooks(response.data.data.books || []);
+        } catch (error) {
+            console.error("Error searching books:", error);
+        }
+    };
+
 
     const fetchBooks = async (userId) => {
         if (!userId) return;
@@ -96,6 +113,16 @@ function MemberDashboard() {
 
                 {activeTab === "books" && (
                     <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
+                        <input 
+                            type="text" 
+                            placeholder="Search books..." 
+                            value={searchQuery} 
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                searchBooks(e.target.value);
+                            }}
+                            className="mb-4 p-2 border border-gray-300 rounded w-full"
+                        />
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {books.length > 0 ? (
                                 books.map((book) => (
@@ -120,7 +147,7 @@ function MemberDashboard() {
 
                                     <div className="flex items-center mt-auto">
                                         <button className="mt-4 bg-purple-500 text-white py-2 px-4 rounded-lg w-full">
-                                        Check Out
+                                        Borrow
                                         </button>
                                     </div>
                                     </div>

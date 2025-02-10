@@ -82,7 +82,7 @@ class MemberController{
 
             if (title) {
                 query += " AND title LIKE ?";
-                params.push(`%${title}%`);
+                params.push(`${title}%`);
             }
         
             if (author) {
