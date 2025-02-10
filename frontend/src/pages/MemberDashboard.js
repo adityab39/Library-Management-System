@@ -15,7 +15,6 @@ function MemberDashboard() {
         setActiveTab(tab);
         localStorage.setItem("activeTab", tab);
     };
-    
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -24,7 +23,6 @@ function MemberDashboard() {
           setUserId(user.id);
         }
     }, []);
-    
 
     useEffect(() => {
         if (userId && activeTab === "books") {
@@ -37,7 +35,11 @@ function MemberDashboard() {
     
         try {
           const apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}`;
-          const response = await axios.get(apiUrl);
+          const response = await axios.get(apiUrl, {
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+          });
           setBooks(response.data.books || []);
         } catch (error) {
           console.error("Error fetching books:", error);
@@ -94,36 +96,29 @@ function MemberDashboard() {
 
             {activeTab === "books" && (
             <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
-                <table className="w-full border-collapse border border-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
-                    <th className="border p-3 text-left">Book Title</th>
-                    <th className="border p-3 text-left">Author</th>
-                    <th className="border p-3 text-left">Category</th>
-                    <th className="border p-3 text-left">Availability</th>
-                    </tr>
-                </thead>
-                <tbody>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {books.length > 0 ? (
                     books.map((book) => (
-                        <tr key={book.id}>
-                        <td className="border p-3">{book.title}</td>
-                        <td className="border p-3">{book.author}</td>
-                        <td className="border p-3">{book.category}</td>
-                        <td className={`border p-3 ${book.available ? "text-green-500" : "text-red-500"}`}>
-                            {book.available ? "Available" : "Not Available"}
-                        </td>
-                        </tr>
+                        <div key={book.id} className="bg-white p-4 rounded-lg shadow-md">
+                            <img src={book.coverImage} alt={book.title} className="w-full h-48 object-cover rounded-t-lg" />
+                            <div className="p-4">
+                                <h2 className="font-bold text-lg">{book.title}</h2>
+                                <p className="text-gray-700">Author: {book.author}</p>
+                                <p className="text-gray-700">Category: {book.category}</p>
+                                <div className="flex items-center mt-2">
+                                    <span className="text-yellow-500">⭐</span>
+                                    <span className="ml-2">Rating Placeholder</span>
+                                </div>
+                                <button className="mt-4 bg-purple-500 text-white py-2 px-4 rounded-lg">Check Out</button>
+                            </div>
+                        </div>
                     ))
                     ) : (
-                    <tr>
-                        <td colSpan="4" className="text-center border p-4 text-gray-500">
+                    <div className="text-center text-gray-500 col-span-full">
                         No books available
-                        </td>
-                    </tr>
+                    </div>
                     )}
-                </tbody>
-                </table>
+                </div>
             </div>
             )}
         </div>
