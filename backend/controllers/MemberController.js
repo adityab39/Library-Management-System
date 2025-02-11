@@ -295,6 +295,26 @@ class MemberController{
 
         return getResponseJson(res, 200, "Review submitted successfully.");
     }
+
+    static async getCategories(req,res){
+        const [categories] = await db.query("SELECT DISTINCT category FROM books");
+
+        if(categories.length == 0){
+            return getResponseJson(res,400,"No categories available");
+        }
+
+        return getResponseJson(res,200,"Categories retrieved successfully.",categories);
+    }
+
+    static async getAuthors(req,res){
+        const [authors] = await db.query("SELECT DISTINCT author FROM books");
+
+        if(authors.length == 0){
+            return getResponseJson(res,400,"No authors available");
+        }
+
+        return getResponseJson(res,200,"Authors retrieved successfully.",authors);
+    }
 }
 
 module.exports = MemberController;

@@ -11,6 +11,14 @@ function MemberDashboard() {
     const [userId, setUserId] = useState(null);
     const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") || "books");
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedAuthor, setSelectedAuthor] = useState("");
+    const [categories, setCategories] = useState([]); 
+    const [authors, setAuthors] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedAuthors, setSelectedAuthors] = useState([]);
+    const [showAuthorDropdown, setShowAuthorDropdown] = useState(false); 
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -31,6 +39,14 @@ function MemberDashboard() {
         }
     }, [userId, activeTab]);
 
+    useEffect(() => {
+        if (userId && activeTab === "books") {
+            fetchBooks(userId);
+            fetchCategories(userId);
+            fetchAuthors(userId);
+        }
+    }, [userId, activeTab]);
+
     const searchBooks = async (query) => {
         if (!query.trim()) {
             fetchBooks(userId); 
@@ -38,7 +54,14 @@ function MemberDashboard() {
         }
     
         try {
-            const apiUrl = `http://localhost:3000/api/member/books/search?user_id=${userId}&title=${query}`;
+            let apiUrl = `http://localhost:3000/api/member/books/search?user_id=${userId}&title=${query}`;
+            
+            if (selectedCategory) {
+                apiUrl += `&category=${selectedCategory}`;
+            }
+            if (selectedAuthor) {
+                apiUrl += `&author=${selectedAuthor}`;
+            }
             const response = await axios.get(apiUrl);
             setBooks(response.data.data.books || []);
         } catch (error) {
@@ -46,17 +69,41 @@ function MemberDashboard() {
         }
     };
 
+    const fetchCategories = async (userId) => {
+        try {
+            const apiUrl = `http://localhost:3000/api/member/books/categories?user_id=${userId}`;
+            const response = await axios.get(apiUrl);
+            setCategories(response.data.data.map(item => item.category));
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
 
-    const fetchBooks = async (userId) => {
+    const fetchAuthors = async (userId) => {
+        try {
+            const apiUrl = `http://localhost:3000/api/member/books/authors?user_id=${userId}`;
+            const response = await axios.get(apiUrl);
+            setAuthors(response.data.data.map(a => a.author));
+        } catch (error) {
+            console.error("Error fetching authors:", error);
+        }
+    };
+
+
+    const fetchBooks = async (userId,categories = selectedCategories, authors = selectedAuthors) => {
         if (!userId) return;
     
         try {
-            const apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}`;
-            const response = await axios.get(apiUrl, {
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
-            });
+            let apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}`;
+    
+            if (categories.length > 0) {
+                apiUrl += `&category=${categories.join(",")}`;
+            }
+            if (authors.length > 0) {
+                apiUrl += `&author=${authors.join(",")}`;
+            }
+    
+            const response = await axios.get(apiUrl);
             setBooks(response.data.data.books || []);
         } catch (error) {
             console.error("Error fetching books:", error);
@@ -67,6 +114,38 @@ function MemberDashboard() {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         navigate("/login");
+    };
+
+    const handleCategoryChange = (category) => {
+        let updatedCategories = selectedCategories || [];
+
+        if (category === "All") {
+            updatedCategories = setSelectedCategories(selectedCategories.length === categories.length ? [] : categories);
+        } else {
+            updatedCategories = updatedCategories.includes(category)
+            ? updatedCategories.filter(c => c !== category) 
+            : [...updatedCategories, category];
+        }
+        setSelectedCategories(updatedCategories);
+
+        fetchBooks(userId, updatedCategories, selectedAuthors || []);
+    };
+    
+    const handleAuthorChange = (author) => {
+        setSelectedAuthors((prevSelectedAuthors) => {
+            let updatedAuthors;
+            
+            if (author === "All") {
+                updatedAuthors = prevSelectedAuthors.length === authors.length ? [] : [...authors];
+            } else {
+                updatedAuthors = prevSelectedAuthors.includes(author)
+                    ? prevSelectedAuthors.filter(a => a !== author)
+                    : [...prevSelectedAuthors, author];
+            }
+    
+            fetchBooks(userId, selectedCategories, updatedAuthors); 
+            return updatedAuthors; 
+        });
     };
 
     return (
@@ -123,6 +202,80 @@ function MemberDashboard() {
                             }}
                             className="mb-4 p-2 border border-gray-300 rounded w-full"
                         />
+                        <div className="flex items-center gap-4 mb-4">
+                        <div className="relative">
+                        <button 
+                            className="px-4 py-2 border rounded-md text-gray-700 bg-white"
+                            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                        >
+                            Filter by Category
+                        </button>
+
+                            {showCategoryDropdown && (
+                                <div className="absolute left-0 top-full mt-2 w-56 bg-white border rounded-md shadow-lg z-50">
+                                    <div className="p-2">
+                                        <label className="flex items-center">
+                                            <input 
+                                                type="checkbox"
+                                                checked={selectedCategories.length === categories.length}
+                                                onChange={() => handleCategoryChange("All")}
+                                                className="mr-2"
+                                            />
+                                            All
+                                        </label>
+                                        {categories.map(category => (
+                                            <label key={category} className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={selectedCategories.includes(category)}
+                                                    onChange={() => handleCategoryChange(category)}
+                                                    className="mr-2"
+                                                />
+                                                {category}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            <button 
+                                className="px-4 py-2 border rounded-md text-gray-700 bg-white"
+                                onClick={() => setShowAuthorDropdown(!showAuthorDropdown)}
+                            >
+                                Filter by Author
+                            </button>
+
+                            {showAuthorDropdown && (
+                                <div className="absolute left-0 top-full mt-2 w-56 bg-white border rounded-md shadow-lg z-50">
+                                    <div className="p-2">
+                                        <label className="flex items-center">
+                                            <input 
+                                                type="checkbox"
+                                                checked={selectedAuthors.length === authors.length}
+                                                onChange={() => handleAuthorChange("All")}
+                                                className="mr-2"
+                                            />
+                                            All
+                                        </label>
+                                        {authors.map(author => (
+                                            <label key={author} className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={selectedAuthors.includes(author)}
+                                                    onChange={() => handleAuthorChange(author)}
+                                                    className="mr-2"
+                                                />
+                                                {author}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                    </div>
+                    </div>
+                    
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {books.length > 0 ? (
                                 books.map((book) => (
