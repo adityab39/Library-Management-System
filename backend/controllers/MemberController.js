@@ -18,8 +18,8 @@ class MemberController{
 
         if(user_id!='')
         {
-            let query = "SELECT * FROM books WHERE available_copies > 0 and is_active = 1";
-            let params = []
+            let query = "SELECT * FROM books WHERE available_copies > 0 and is_active = 1 and id NOT IN (SELECT book_id FROM borrowed_books WHERE user_id = ? AND returned_at IS NULL)";
+            let params = [user_id];
 
             if(title){
                 query+="AND title LIKE ?";
