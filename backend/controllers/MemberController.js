@@ -25,14 +25,23 @@ class MemberController{
                 query+="AND title LIKE ?";
                 params.push(`%${title}%`);
             }
+            
             if (author) {
-                query += " AND author LIKE ?";
-                params.push(`%${author}%`);
+                const authorArray = author.split(",");
+                const findInSetConditions = authorArray.map(() => `FIND_IN_SET(?, author)`).join(" OR ");
+            
+                query += ` AND (${findInSetConditions})`;
+                params.push(...authorArray);
             }
+
             if (category) {
-                query += " AND category LIKE ?";
-                params.push(`%${category}%`);
+                const categoryArray = category.split(",");
+                const findInSetConditions = categoryArray.map(() => `FIND_IN_SET(?, category)`).join(" OR ");
+
+                query += ` AND (${findInSetConditions})`;
+                params.push(...categoryArray);
             }
+
             query += " LIMIT ? OFFSET ?";
             params.push(limit, offset);
 

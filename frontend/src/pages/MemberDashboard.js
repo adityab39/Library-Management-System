@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function MemberDashboard() {
     const navigate = useNavigate();
@@ -19,6 +21,7 @@ function MemberDashboard() {
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const [showAuthorDropdown, setShowAuthorDropdown] = useState(false); 
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const [borrowedBooks, setBorrowedBooks] = useState(new Set());
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -117,17 +120,16 @@ function MemberDashboard() {
     };
 
     const handleCategoryChange = (category) => {
-        let updatedCategories = selectedCategories || [];
-
-        if (category === "All") {
-            updatedCategories = setSelectedCategories(selectedCategories.length === categories.length ? [] : categories);
+        let updatedCategories = [...(selectedCategories || [])];
+    
+        if (updatedCategories.includes(category)) {
+            updatedCategories = updatedCategories.filter(c => c !== category);
         } else {
-            updatedCategories = updatedCategories.includes(category)
-            ? updatedCategories.filter(c => c !== category) 
-            : [...updatedCategories, category];
+            updatedCategories.push(category);
         }
+    
         setSelectedCategories(updatedCategories);
-
+    
         fetchBooks(userId, updatedCategories, selectedAuthors || []);
     };
     
@@ -135,21 +137,42 @@ function MemberDashboard() {
         setSelectedAuthors((prevSelectedAuthors) => {
             let updatedAuthors;
             
-            if (author === "All") {
-                updatedAuthors = prevSelectedAuthors.length === authors.length ? [] : [...authors];
-            } else {
-                updatedAuthors = prevSelectedAuthors.includes(author)
-                    ? prevSelectedAuthors.filter(a => a !== author)
-                    : [...prevSelectedAuthors, author];
-            }
+            updatedAuthors = prevSelectedAuthors.includes(author)
+                ? prevSelectedAuthors.filter(a => a !== author)
+                : [...prevSelectedAuthors, author];
     
             fetchBooks(userId, selectedCategories, updatedAuthors); 
             return updatedAuthors; 
         });
     };
 
+    const borrowBook = async (bookId) => {
+        if (borrowedBooks.has(bookId)) return; 
+    
+        try {
+            const apiUrl = `http://localhost:3000/api/member/books/borrow`;
+            const response = await axios.post(apiUrl, { book_id: bookId }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+    
+            if (response.data.message === "Book borrowed successfully.") {
+                setBorrowedBooks(new Set([...borrowedBooks, bookId]));
+                toast.success("Book borrowed successfully!", { position: "top-right" });
+
+                fetchBooks(userId, selectedCategories, selectedAuthors);
+            }
+        } catch (error) {
+            toast.error("Failed to borrow book", { position: "top-right" });
+            console.error("Error borrowing book:", error);
+        }
+    };
+
+
     return (
         <div className="flex h-screen bg-gray-100">
+            <ToastContainer />
             {/* Sidebar */}
             <div className="flex flex-col w-64 bg-white shadow-md">
                 <div className="h-16"></div> {/* Empty space for alignment */}
@@ -214,26 +237,17 @@ function MemberDashboard() {
                             {showCategoryDropdown && (
                                 <div className="absolute left-0 top-full mt-2 w-56 bg-white border rounded-md shadow-lg z-50">
                                     <div className="p-2">
-                                        <label className="flex items-center">
+                                    {categories.map(category => (
+                                        <label key={category} className="flex items-center">
                                             <input 
                                                 type="checkbox"
-                                                checked={selectedCategories.length === categories.length}
-                                                onChange={() => handleCategoryChange("All")}
+                                                checked={selectedCategories.includes(category)}
+                                                onChange={() => handleCategoryChange(category)}
                                                 className="mr-2"
                                             />
-                                            All
+                                            {category}
                                         </label>
-                                        {categories.map(category => (
-                                            <label key={category} className="flex items-center">
-                                                <input 
-                                                    type="checkbox"
-                                                    checked={selectedCategories.includes(category)}
-                                                    onChange={() => handleCategoryChange(category)}
-                                                    className="mr-2"
-                                                />
-                                                {category}
-                                            </label>
-                                        ))}
+                                    ))}
                                     </div>
                                 </div>
                             )}
@@ -250,15 +264,6 @@ function MemberDashboard() {
                             {showAuthorDropdown && (
                                 <div className="absolute left-0 top-full mt-2 w-56 bg-white border rounded-md shadow-lg z-50">
                                     <div className="p-2">
-                                        <label className="flex items-center">
-                                            <input 
-                                                type="checkbox"
-                                                checked={selectedAuthors.length === authors.length}
-                                                onChange={() => handleAuthorChange("All")}
-                                                className="mr-2"
-                                            />
-                                            All
-                                        </label>
                                         {authors.map(author => (
                                             <label key={author} className="flex items-center">
                                                 <input 
@@ -299,9 +304,13 @@ function MemberDashboard() {
                                     <p className="text-gray-700">Category: {book.category}</p>
 
                                     <div className="flex items-center mt-auto">
-                                        <button className="mt-4 bg-purple-500 text-white py-2 px-4 rounded-lg w-full">
-                                        Borrow
-                                        </button>
+                                    <button 
+                                        className={`mt-4 py-2 px-4 rounded-lg w-full ${borrowedBooks.has(book.id) ? "bg-gray-400 cursor-not-allowed" : "bg-purple-500 text-white"}`}
+                                        onClick={() => borrowBook(book.id)}
+                                        disabled={borrowedBooks.has(book.id)}
+                                    >
+                                        {borrowedBooks.has(book.id) ? "Borrowed" : "Borrow"}
+                                    </button>
                                     </div>
                                     </div>
                                 </div>
