@@ -25,7 +25,7 @@ class MemberController{
                 query+="AND title LIKE ?";
                 params.push(`%${title}%`);
             }
-            
+
             if (author) {
                 const authorArray = author.split(",");
                 const findInSetConditions = authorArray.map(() => `FIND_IN_SET(?, author)`).join(" OR ");
@@ -279,30 +279,25 @@ class MemberController{
     }
 
     static async reviewBook(req,res){
-        const user_id = req.user.id;
         const book_id = req.body.book_id;
         const rating = req.body.rating;
-        const review = req.body.review;
-
-        if(!user_id){
-            return getResponseJson(res,500,"Please try again.");
-        }
+        const user_id = req.user.id;
 
         const [borrowed] = await db.query(
-            "SELECT id FROM borrowed_books WHERE user_id = ? AND book_id = ? AND returned_at IS NOT NULL",
+            "SELECT id FROM book_reviews WHERE user_id = ? AND book_id = ?",
             [user_id, book_id]
         );
         
-        if (borrowed.length === 0) {
-            return getResponseJson(res, 400, "You can only review books that you have borrowed and returned.");
+        if (borrowed.length > 0) {
+            return getResponseJson(res, 400, "You have already given a rating for this book.");
         }
 
         await db.query(
-            "INSERT INTO book_reviews (user_id, book_id, rating, review) VALUES (?, ?, ?, ?)",
-            [user_id, book_id, rating, review]
+            "INSERT INTO book_reviews (user_id, book_id, rating) VALUES (?, ?, ?)",
+            [user_id, book_id, rating]
         );
 
-        return getResponseJson(res, 200, "Review submitted successfully.");
+        return getResponseJson(res, 200, "Rating submitted successfully.");
     }
 
     static async getCategories(req,res){

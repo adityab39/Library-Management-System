@@ -22,6 +22,9 @@ function MemberDashboard() {
     const [showAuthorDropdown, setShowAuthorDropdown] = useState(false); 
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [borrowedBooks, setBorrowedBooks] = useState(new Set());
+    const [selectedBook, setSelectedBook] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [userRating, setUserRating] = useState(0);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -169,6 +172,53 @@ function MemberDashboard() {
         }
     };
 
+    const openBookDetails = (book) => {
+        setSelectedBook(book);
+        setShowModal(true);
+    };
+    
+    const closeBookDetails = () => {
+        setShowModal(false);
+        setSelectedBook(null);
+    };
+
+    const submitRating = async (rating) => {
+        if (!selectedBook || !userId) return;
+    
+        const token = localStorage.getItem("token"); 
+    
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/api/member/books/review",
+                {
+                    book_id: selectedBook.id,
+                    rating: rating
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, 
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+    
+            // Check if status code is 200 (Success)
+            if (response.status === 200) {
+                toast.success(response.data.message, { position: "top-right" });
+                setUserRating(rating);
+                fetchBooks(userId);
+            } else {
+                toast.error("Failed to submit review", { position: "top-right" });
+            }
+    
+        } catch (error) {
+            console.error("Error submitting review:", error);
+            
+            // Display error message if available, otherwise show a generic error
+            const errorMessage = error.response?.data?.message || "Failed to submit review";
+            toast.error(errorMessage, { position: "top-right" });
+        }
+    };
 
     return (
         <div className="flex h-screen bg-gray-100">
@@ -286,8 +336,9 @@ function MemberDashboard() {
                                 books.map((book) => (
                                     <div 
                                     key={book.id} 
-                                      className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between h-full  
-             transform transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+                                    onClick={() => openBookDetails(book)}
+                                    className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between h-full  
+        transform transition-transform duration-200 hover:scale-105 hover:shadow-lg cursor-pointer"
                                     >
                                     <img 
                                         src={book.cover_image}
@@ -309,7 +360,7 @@ function MemberDashboard() {
                                         onClick={() => borrowBook(book.id)}
                                         disabled={borrowedBooks.has(book.id)}
                                     >
-                                        {borrowedBooks.has(book.id) ? "Borrowed" : "Borrow"}
+                                        {borrowedBooks.has(book.id) ? "Borrowed" : "Check Out"}
                                     </button>
                                     </div>
                                     </div>
@@ -324,6 +375,49 @@ function MemberDashboard() {
                     </div>
                 )}
             </div>
+                {showModal && selectedBook && (
+                    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+                    <div className="bg-white p-8 rounded-lg shadow-xl max-w-3xl w-full relative flex">
+                        
+                        <button 
+                            className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg"
+                            onClick={closeBookDetails}
+                        >
+                            ❌
+                        </button>
+
+                        <div className="w-1/3">
+                            <img 
+                                src={selectedBook.cover_image} 
+                                className="w-full h-auto rounded-lg shadow-md object-cover"
+                            />
+                        </div>
+
+                        {/* Right - Book Details */}
+                        <div className="w-2/3 pl-6 flex flex-col justify-start items-start self-start">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">{selectedBook.title}</h2>
+                            <p className="text-gray-600"><strong>ISBN:</strong> {selectedBook.isbn}</p>
+                            <p className="text-gray-600"><strong>Author:</strong> {selectedBook.author}</p>
+                            <p className="text-gray-600"><strong>Category:</strong> {selectedBook.category}</p>
+                            <p className="text-gray-400 mt-4">{selectedBook.description}</p>
+
+                            {/* ⭐ Rating Section */}
+                            <div className="flex items-center mt-4">
+                            <strong className="mr-2 text-gray-700">Ratings:</strong>
+                            {[...Array(5)].map((_, index) => (
+                                <span 
+                                    key={index} 
+                                    className={`cursor-pointer text-${index < userRating ? 'yellow' : 'gray'}-500 text-lg`}
+                                    onClick={() => submitRating(index + 1)} 
+                                >
+                                    ★
+                                </span>
+                            ))}
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
