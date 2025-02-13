@@ -26,6 +26,8 @@ function MemberDashboard() {
     const [showModal, setShowModal] = useState(false);
     const [userRating, setUserRating] = useState(0);
     const [borrowedBookList, setBorrowedBookList] = useState([]);
+    const [isCategoryClicked, setIsCategoryClicked] = useState(false);
+    const [selectedCategories1, setSelectedCategories1] = useState([]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -325,13 +327,13 @@ function MemberDashboard() {
                             }}
                             className="mb-4 p-2 border border-gray-300 rounded w-full"
                         />
-                        <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-4 mb-4 justify-end">
                         <div className="relative">
                         <button 
                             className="px-4 py-2 border rounded-md text-gray-700 bg-white"
                             onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                         >
-                            Filter by Category
+                            Categories
                         </button>
 
                             {showCategoryDropdown && (
@@ -358,7 +360,7 @@ function MemberDashboard() {
                                 className="px-4 py-2 border rounded-md text-gray-700 bg-white"
                                 onClick={() => setShowAuthorDropdown(!showAuthorDropdown)}
                             >
-                                Filter by Author
+                                Authors
                             </button>
 
                             {showAuthorDropdown && (
