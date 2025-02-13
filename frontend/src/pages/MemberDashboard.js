@@ -273,7 +273,7 @@ function MemberDashboard() {
         <div className="flex h-screen bg-gray-100">
             <ToastContainer />
             {/* Sidebar */}
-            <div className="flex flex-col w-64 bg-white shadow-md">
+            <div className="fixed left-0 top-0 h-screen w-64 bg-white shadow-md">
                 <div className="h-16"></div> {/* Empty space for alignment */}
                 <nav className="p-5 space-y-4">
                     <button
@@ -292,7 +292,7 @@ function MemberDashboard() {
             </div>
 
             <div className="flex-1 flex flex-col">
-                <header className="flex justify-between items-center bg-gradient-to-r from-purple-700 to-purple-400 text-white p-4 shadow w-full absolute left-0 top-0 h-16">
+                <header className="fixed top-0 left-0 w-full bg-gradient-to-r from-purple-700 to-purple-400 text-white p-4 shadow-md z-50 flex justify-between items-center h-16">
                     <h1 className="text-xl font-semibold ml-5">Dashboard</h1>
                     <div className="relative mr-5">
                         <button
@@ -313,6 +313,7 @@ function MemberDashboard() {
                 </header>
 
                 {activeTab === "books" && (
+                    <div className="ml-64 flex-1 p-6">
                     <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
                         <input 
                             type="text" 
@@ -423,6 +424,7 @@ function MemberDashboard() {
                                 </div>
                             )}
                         </div>
+                    </div>
                     </div>
                 )}
                 {activeTab === "borrowed" && (
