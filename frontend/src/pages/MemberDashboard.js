@@ -26,8 +26,7 @@ function MemberDashboard() {
     const [showModal, setShowModal] = useState(false);
     const [userRating, setUserRating] = useState(0);
     const [borrowedBookList, setBorrowedBookList] = useState([]);
-    const [isCategoryClicked, setIsCategoryClicked] = useState(false);
-    const [selectedCategories1, setSelectedCategories1] = useState([]);
+    const [borrowedHistory, setBorrowedHistory] = useState([]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -36,6 +35,8 @@ function MemberDashboard() {
             fetchBooks(userId);
         } else if (tab === "borrowed") {
             fetchBorrowedBooks();
+        }else if (tab === "history") {
+            fetchBorrowedHistory();
         }
     };
 
@@ -66,6 +67,12 @@ function MemberDashboard() {
             fetchBorrowedBooks();
         }
     }, [userId, activeTab]);
+
+    useEffect(() => {
+        if (activeTab === "history") {
+            fetchBorrowedHistory();
+        }
+    }, [activeTab]);
 
 
 
@@ -252,12 +259,12 @@ function MemberDashboard() {
         }
     };
 
-    const returnBook = async (bookId) => {
+    const returnBook = async (bookId,borrowedID) => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.post(
                 "http://localhost:3000/api/member/books/return",
-                { book_id: bookId },
+                { book_id: bookId, borrowed_id : borrowedID },
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
@@ -268,6 +275,18 @@ function MemberDashboard() {
         } catch (error) {
             console.error("Error returning book:", error);
             toast.error("Failed to return book", { position: "top-right" });
+        }
+    };
+
+    const fetchBorrowedHistory = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:3000/api/member/books/history", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setBorrowedHistory(response.data.data || []);
+        } catch (error) {
+            console.error("Error fetching borrowing history:", error);
         }
     };
 
@@ -289,6 +308,12 @@ function MemberDashboard() {
                         onClick={() => handleTabChange("borrowed")}
                     >
                         Borrowed Books
+                    </button>
+                    <button
+                        className={`block p-3 rounded ${activeTab === "history" ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-100"}`}
+                        onClick={() => handleTabChange("history")}
+                    >
+                        Borrowed History
                     </button>
                 </nav>
             </div>
@@ -453,7 +478,7 @@ function MemberDashboard() {
                                                 <td className="px-4 py-2 border">
                                                     <button 
                                                         className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
-                                                        onClick={() => returnBook(book.book_id)}
+                                                        onClick={() => returnBook(book.book_id,book.borrowed_id)}
                                                     >
                                                         Return
                                                     </button>
@@ -472,6 +497,47 @@ function MemberDashboard() {
                         </div>
                     </div>
                 </div>
+                )}
+                {activeTab === "history" && (
+                    <div className="ml-64 flex-1 p-6">
+                        <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
+                        <h2 className="text-1.5xl font-semibold mb-4">Borrowed History</h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="px-4 py-2 border text-sm text-left">Title</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Borrowed Date</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Due Date</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Returned Date</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Fine</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {borrowedHistory.length > 0 ? (
+                                        borrowedHistory.map((book) => (
+                                            <tr key={book.book_id} className="text-center">
+                                                <td className="px-4 py-2 border">{book.title}</td>
+                                                <td className="px-4 py-2 border">{new Date(book.borrowed_date).toLocaleDateString()}</td>
+                                                <td className="px-4 py-2 border">{new Date(book.due_date).toLocaleDateString()}</td>
+                                                <td className="px-4 py-2 border">
+                                                    {book.returned_date ? new Date(book.returned_date).toLocaleDateString() : "Not Returned"}
+                                                </td>
+                                                <td className="px-4 py-2 border">{book.fine}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="5" className="text-center text-gray-500 py-4">
+                                                No borrowing history found.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
                 )}
             </div>
                 {showModal && selectedBook && (

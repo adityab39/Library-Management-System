@@ -187,6 +187,7 @@ class MemberController{
     static async returnBook(req,res){
         const user_id = req.user.id;
         const book_id = req.body.book_id;
+        const borrowed_id = req.body.borrowed_id;
 
         if (!user_id || !book_id) {
             return getResponseJson(res, 400, "Please try again.");
@@ -195,8 +196,8 @@ class MemberController{
         if(user_id!='' && book_id!='')
         {
             const [borrowed] = await db.query(
-                "SELECT due_date FROM borrowed_books WHERE user_id = ? AND book_id = ? AND returned_at IS NULL",
-                [user_id, book_id]
+                "SELECT due_date FROM borrowed_books WHERE user_id = ? AND book_id = ? AND id = ? AND returned_at IS NULL",
+                [user_id, book_id, borrowed_id]
             );
             
             if (borrowed.length === 0) {
@@ -213,8 +214,8 @@ class MemberController{
             }
 
             await db.query(
-                "UPDATE borrowed_books SET returned_at = NOW(), fine = ?, paid = ?, modified_time = NOW() WHERE user_id = ? AND book_id = ?",
-                [fine, fine === 0, user_id, book_id]
+                "UPDATE borrowed_books SET returned_at = NOW(), fine = ?, paid = ?, modified_time = NOW() WHERE user_id = ? AND book_id = ? AND id = ?",
+                [fine, fine === 0, user_id, book_id, borrowed_id]
             );
 
             await db.query("UPDATE books SET available_copies = available_copies + 1 WHERE id = ?", [book_id]);
@@ -233,6 +234,7 @@ class MemberController{
         const user_id = req.user?.id;
         const [books] = await db.query(`
             SELECT 
+                bb.id as borrowed_id,
                 b.id AS book_id, 
                 b.title, 
                 b.author, 
@@ -262,9 +264,9 @@ class MemberController{
                 b.id AS book_id, 
                 b.title, 
                 b.author, 
-                bb.borrowed_at, 
-                bb.due_date, 
-                bb.returned_at, 
+                DATE_FORMAT(bb.borrowed_at,"%m-%d-%Y") AS borrowed_date, 
+                DATE_FORMAT(bb.due_date,"%m-%d-%Y") AS due_date, 
+                IF(bb.returned_at IS NOT NULL, DATE_FORMAT(bb.returned_at,"%m-%d-%Y"), "") AS returned_date, 
                 bb.fine 
              FROM borrowed_books bb
              JOIN books b ON bb.book_id = b.id
