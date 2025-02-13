@@ -36,7 +36,7 @@ class MemberController{
 
             if (category) {
                 const categoryArray = category.split(",");
-                const findInSetConditions = categoryArray.map(() => `FIND_IN_SET(?, category)`).join(" OR ");
+                const findInSetConditions = categoryArray.map(() => `   (?, category)`).join(" OR ");
 
                 query += ` AND (${findInSetConditions})`;
                 params.push(...categoryArray);
@@ -244,7 +244,7 @@ class MemberController{
         
             
         if(books.length == 0){
-            return getResponseJson(res,400,"You have no borrowed books");
+            return getResponseJson(res,200,"You have no borrowed books");
         }
 
         return getResponseJson(res,200,"Borrowed books retrieved successfully.",books);

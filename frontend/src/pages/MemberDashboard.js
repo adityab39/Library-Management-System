@@ -25,10 +25,16 @@ function MemberDashboard() {
     const [selectedBook, setSelectedBook] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [userRating, setUserRating] = useState(0);
+    const [borrowedBookList, setBorrowedBookList] = useState([]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         localStorage.setItem("activeTab", tab);
+        if (tab === "books") {
+            fetchBooks(userId);
+        } else if (tab === "borrowed") {
+            fetchBorrowedBooks();
+        }
     };
 
     useEffect(() => {
@@ -52,6 +58,14 @@ function MemberDashboard() {
             fetchAuthors(userId);
         }
     }, [userId, activeTab]);
+
+    useEffect(() => {
+        if (userId && activeTab === "borrowed") {
+            fetchBorrowedBooks();
+        }
+    }, [userId, activeTab]);
+
+
 
     const searchBooks = async (query) => {
         if (!query.trim()) {
@@ -220,6 +234,41 @@ function MemberDashboard() {
         }
     };
 
+    const fetchBorrowedBooks = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:3000/api/member/books/borrowed", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            const books = response.data.data || [];  
+            setBorrowedBookList(books);
+            const borrowedBookIds = new Set(response.data.data.map(book => book.book_id));
+            setBorrowedBooks(borrowedBookIds);
+        } catch (error) {
+            console.error("Error fetching borrowed books:", error);
+        }
+    };
+
+    const returnBook = async (bookId) => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.post(
+                "http://localhost:3000/api/member/books/return",
+                { book_id: bookId },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+    
+            toast.success(response.data.message, { position: "top-right" });
+            fetchBorrowedBooks(); // Refresh the table after returning the book
+        } catch (error) {
+            console.error("Error returning book:", error);
+            toast.error("Failed to return book", { position: "top-right" });
+        }
+    };
+
     return (
         <div className="flex h-screen bg-gray-100">
             <ToastContainer />
@@ -356,11 +405,13 @@ function MemberDashboard() {
 
                                     <div className="flex items-center mt-auto">
                                     <button 
-                                        className={`mt-4 py-2 px-4 rounded-lg w-full ${borrowedBooks.has(book.id) ? "bg-gray-400 cursor-not-allowed" : "bg-purple-500 text-white"}`}
-                                        onClick={() => borrowBook(book.id)}
-                                        disabled={borrowedBooks.has(book.id)}
+                                        className="mt-4 py-2 px-4 rounded-lg w-full bg-purple-500 text-white"
+                                        onClick={(e) => {
+                                            e.stopPropagation(); 
+                                            borrowBook(book.id); 
+                                        }}
                                     >
-                                        {borrowedBooks.has(book.id) ? "Borrowed" : "Check Out"}
+                                        Check Out
                                     </button>
                                     </div>
                                     </div>
@@ -374,6 +425,48 @@ function MemberDashboard() {
                         </div>
                     </div>
                 )}
+                {activeTab === "borrowed" && (
+                <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
+                    <h2 className="text-1.5xl font-semibold mb-4">Borrowed Books</h2>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                <th className="px-4 py-2 border text-sm">Title</th>
+                                <th className="px-4 py-2 border text-sm">Author</th>
+                                <th className="px-4 py-2 border text-sm">Due Date</th>
+                                <th className="px-4 py-2 border text-sm">Action</th>
+                                                                </tr>
+                            </thead>
+                            <tbody>
+                            {borrowedBookList.length > 0 ? (
+                                borrowedBookList.map((book) => (
+                                    <tr key={book.book_id} className="text-center">
+                                        <td className="px-4 py-2 border">{book.title}</td>
+                                        <td className="px-4 py-2 border">{book.author}</td>
+                                        <td className="px-4 py-2 border">{new Date(book.due_date).toLocaleDateString()}</td>
+                                        <td className="px-4 py-2 border">
+                                            <button 
+                                                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                                                onClick={() => returnBook(book.book_id)}
+                                            >
+                                                Return
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="text-center text-gray-500 py-4">
+                                        No borrowed books found.
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
             </div>
                 {showModal && selectedBook && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">

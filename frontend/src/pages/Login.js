@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -101,25 +102,25 @@ function Login() {
         </form>
 
         <div className="text-center mt-4">
-          <a href="#" className="text-sm text-purple-600 hover:underline">
-            Forgot Password?
-          </a>
+        <p className="text-center mt-2 text-purple-600 font-semibold cursor-pointer">
+            <Link to="/forgot-password">Forgot Password?</Link>
+        </p>
         </div>
 
         <div className="text-center mt-2">
           <p className="text-sm text-gray-700">
             Don't have an account?{" "}
-            <a href="/signup" className="text-purple-700 font-semibold hover:underline">
+            <Link to="/signup" className="text-purple-600 font-semibold">
               Sign Up
-            </a>
+          </Link>
           </p>
         </div>
 
         <p className="text-center text-xs text-gray-500 mt-4">
           By logging in, you agree to our{" "}
-          <a href="#" className="font-bold text-purple-700">Privacy Policy</a> and{" "}
-          <a href="#" className="font-bold text-purple-700">Terms of Service</a>.
-        </p>
+          <span className="font-bold text-purple-700 cursor-default">Privacy Policy</span> and{" "}
+          <span className="font-bold text-purple-700 cursor-default">Terms of Service</span>.
+      </p>
       </div>
     </div>
   );

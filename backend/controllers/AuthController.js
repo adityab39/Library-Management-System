@@ -26,7 +26,7 @@ class AuthController{
             {
                 const hashedPassword = await bcrypt.hash(password, 10);
                 await db.query(
-                    "INSERT INTO USERS (name,email,mobile,password,role) VALUES (?,?,?,?,?)",[name,email,mobile,hashedPassword,"member"]);
+                    "INSERT INTO USERS (name,email,mobile,password,role_id) VALUES (?,?,?,?,?)",[name,email,mobile,hashedPassword,2]);
 
             }
         }else
