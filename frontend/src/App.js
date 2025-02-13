@@ -6,6 +6,7 @@ import Logout from "./components/Logout";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOtp from "./pages/VerifyOtp";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

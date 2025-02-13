@@ -428,47 +428,49 @@ function MemberDashboard() {
                     </div>
                 )}
                 {activeTab === "borrowed" && (
-                <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
-                    <h2 className="text-1.5xl font-semibold mb-4">Borrowed Books</h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg">
-                            <thead>
-                                <tr className="bg-gray-100">
-                                <th className="px-4 py-2 border text-sm">Title</th>
-                                <th className="px-4 py-2 border text-sm">Author</th>
-                                <th className="px-4 py-2 border text-sm">Due Date</th>
-                                <th className="px-4 py-2 border text-sm">Action</th>
-                                                                </tr>
-                            </thead>
-                            <tbody>
-                            {borrowedBookList.length > 0 ? (
-                                borrowedBookList.map((book) => (
-                                    <tr key={book.book_id} className="text-center">
-                                        <td className="px-4 py-2 border">{book.title}</td>
-                                        <td className="px-4 py-2 border">{book.author}</td>
-                                        <td className="px-4 py-2 border">{new Date(book.due_date).toLocaleDateString()}</td>
-                                        <td className="px-4 py-2 border">
-                                            <button 
-                                                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
-                                                onClick={() => returnBook(book.book_id)}
-                                            >
-                                                Return
-                                            </button>
-                                        </td>
+                <div className="ml-64 flex-1 p-6">
+                        <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
+                        <h2 className="text-1.5xl font-semibold mb-4">Borrowed Books</h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="px-4 py-2 border text-sm text-left">Title</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Author</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Due Date</th>
+                                        <th className="px-4 py-2 border text-sm text-left">Action</th>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="4" className="text-center text-gray-500 py-4">
-                                        No borrowed books found.
-                                    </td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {borrowedBookList.length > 0 ? (
+                                        borrowedBookList.map((book) => (
+                                            <tr key={book.book_id} className="text-center">
+                                                <td className="px-4 py-2 border">{book.title}</td>
+                                                <td className="px-4 py-2 border">{book.author}</td>
+                                                <td className="px-4 py-2 border">{new Date(book.due_date).toLocaleDateString()}</td>
+                                                <td className="px-4 py-2 border">
+                                                    <button 
+                                                        className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                                                        onClick={() => returnBook(book.book_id)}
+                                                    >
+                                                        Return
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="text-center text-gray-500 py-4">
+                                                No borrowed books found.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            )}
+                )}
             </div>
                 {showModal && selectedBook && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
