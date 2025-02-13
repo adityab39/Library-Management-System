@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ForgotPassword() {
     const navigate = useNavigate();
@@ -10,9 +12,29 @@ function ForgotPassword() {
         e.preventDefault();
         try {
             const response = await axios.post("http://localhost:3000/api/auth/forgot-password", { email });
-            alert(response.data.message);
+    
+            if (response.status === 200) {
+                localStorage.setItem("resetEmail", email); 
+                toast.success(response.data.message, {
+                    position: "bottom-right",
+                    autoClose: 3000, 
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+    
+                navigate("/verify-otp"); 
+            }
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to send reset link.");
+            toast.error(err.response?.data?.message || "Failed to send reset link.", {
+                position: "bottom-right",
+                autoClose: 3000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     };
 
