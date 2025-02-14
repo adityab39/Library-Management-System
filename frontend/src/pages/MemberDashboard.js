@@ -462,10 +462,10 @@ function MemberDashboard() {
                             <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
                                 <thead>
                                     <tr className="bg-gray-100">
-                                        <th className="px-4 py-2 border text-sm text-left">Title</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Author</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Due Date</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Action</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Title</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Author</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Due Date</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -506,11 +506,11 @@ function MemberDashboard() {
                             <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
                                 <thead>
                                     <tr className="bg-gray-100">
-                                        <th className="px-4 py-2 border text-sm text-left">Title</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Borrowed Date</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Due Date</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Returned Date</th>
-                                        <th className="px-4 py-2 border text-sm text-left">Fine</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Title</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Borrowed Date</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Due Date</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Returned Date</th>
+                                        <th className="px-4 py-2 border text-sm text-center">Fine</th>
                                     </tr>
                                 </thead>
                                 <tbody>
