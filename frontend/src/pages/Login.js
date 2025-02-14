@@ -55,7 +55,7 @@ function Login() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
         <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Library Logo" className="w-20 h-20" />
+          <img src="/logo.jpg" alt="Library Logo" className="w-20 h-20" />
         </div>
 
         <h2 className="text-center text-xl font-bold text-gray-900 mb-4">

@@ -295,7 +295,11 @@ function MemberDashboard() {
             <ToastContainer />
             {/* Sidebar */}
             <div className="fixed left-0 top-0 h-screen w-64 bg-white shadow-md">
-                <div className="h-16"></div> {/* Empty space for alignment */}
+                <div className="h-20"></div> {/* Empty space for alignment */}
+                <div className="mt-6 mb-6 flex justify-center w-full">
+                    <img src="/logo.jpg" alt="Library Logo" className="w-32 h-32 object-contain" />
+                </div>
+
                 <nav className="p-5 space-y-4">
                     <button
                         className={`block p-3 rounded ${activeTab === "books" ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-100"}`}

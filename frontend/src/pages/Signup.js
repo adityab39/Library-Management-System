@@ -63,7 +63,7 @@ function Signup() {
                 
                 {/* Logo */}
                 <div className="flex justify-center mb-4">
-                    <img src="/logo.png" alt="Library Logo" className="h-12" />
+                    <img src="/logo.jpg" alt="Library Logo" className="h-12" />
                 </div>
 
                 {/* Title */}

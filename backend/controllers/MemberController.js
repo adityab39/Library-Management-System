@@ -47,6 +47,16 @@ class MemberController{
 
             const [books] = await db.query(query,params);
 
+
+            for (let book of books) {
+                const [ratingResult] = await db.query(
+                    "SELECT rating FROM book_reviews WHERE book_id = ? AND user_id = ?",
+                    [book.id, user_id]
+                );
+
+                book.userRating = ratingResult.length > 0 ? ratingResult[0].rating : -1;
+            }
+
             if(books.length == 0){
                 return getResponseJson(res,400,"No books available");
             }
