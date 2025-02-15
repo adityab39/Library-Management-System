@@ -230,6 +230,11 @@ function MemberDashboard() {
                 toast.success(response.data.message, { position: "top-right" });
                 setUserRating(rating);
                 fetchBooks(userId);
+
+                setTimeout(() => {
+                    setShowModal(false);
+                }, 500); 
+                
             } else {
                 toast.error("Failed to submit review", { position: "top-right" });
             }
@@ -571,17 +576,28 @@ function MemberDashboard() {
                             <p className="text-gray-400 mt-4">{selectedBook.description}</p>
 
                             {/* ⭐ Rating Section */}
+                            <div className="flex flex-col mt-4">
                             <div className="flex items-center mt-4">
                             <strong className="mr-2 text-gray-700">Ratings:</strong>
                             {[...Array(5)].map((_, index) => (
                                 <span 
                                     key={index} 
-                                    className={`cursor-pointer text-${index < userRating ? 'yellow' : 'gray'}-500 text-lg`}
-                                    onClick={() => submitRating(index + 1)} 
+                                    className={`text-lg ${index < selectedBook.userRating ? 'text-yellow-500' : 'text-gray-400'} 
+                                    ${selectedBook.userRating !== -1 ? 'cursor-default' : 'cursor-pointer'}`}
+                                    onClick={() => {
+                                        if (selectedBook.userRating === -1) {
+                                            submitRating(index + 1);
+                                        }
+                                    }} 
                                 >
                                     ★
                                 </span>
                             ))}
+                            </div>
+
+                            {selectedBook.userRating !== -1 && (
+                                <p className="text-gray-700 mt-2 font-semibold">You have rated this book</p>
+                            )}
                         </div>
                         </div>
                     </div>
