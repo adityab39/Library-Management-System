@@ -5,293 +5,297 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function MemberDashboard() {
-    const navigate = useNavigate();
-    const [showLogout, setShowLogout] = useState(false);
-    const [memberName, setMemberName] = useState("Member");
-    const [books, setBooks] = useState([]);
-    const [userId, setUserId] = useState(null);
-    const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") || "books");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("");
-    const [selectedAuthor, setSelectedAuthor] = useState("");
-    const [categories, setCategories] = useState([]); 
-    const [authors, setAuthors] = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedAuthors, setSelectedAuthors] = useState([]);
-    const [showAuthorDropdown, setShowAuthorDropdown] = useState(false); 
-    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-    const [borrowedBooks, setBorrowedBooks] = useState(new Set());
-    const [selectedBook, setSelectedBook] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [userRating, setUserRating] = useState(0);
-    const [borrowedBookList, setBorrowedBookList] = useState([]);
-    const [borrowedHistory, setBorrowedHistory] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    function MemberDashboard() {
+        const navigate = useNavigate();
+        const [showLogout, setShowLogout] = useState(false);
+        const [memberName, setMemberName] = useState("Member");
+        const [books, setBooks] = useState([]);
+        const [userId, setUserId] = useState(null);
+        const [activeTab, setActiveTab] = useState(localStorage.getItem("activeTab") || "books");
+        const [searchQuery, setSearchQuery] = useState("");
+        const [selectedCategory, setSelectedCategory] = useState("");
+        const [selectedAuthor, setSelectedAuthor] = useState("");
+        const [categories, setCategories] = useState([]); 
+        const [authors, setAuthors] = useState([]);
+        const [selectedCategories, setSelectedCategories] = useState([]);
+        const [selectedAuthors, setSelectedAuthors] = useState([]);
+        const [showAuthorDropdown, setShowAuthorDropdown] = useState(false); 
+        const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+        const [borrowedBooks, setBorrowedBooks] = useState(new Set());
+        const [selectedBook, setSelectedBook] = useState(null);
+        const [showModal, setShowModal] = useState(false);
+        const [userRating, setUserRating] = useState(0);
+        const [borrowedBookList, setBorrowedBookList] = useState([]);
+        const [borrowedHistory, setBorrowedHistory] = useState([]);
+        const [currentPage, setCurrentPage] = useState(1);
+        const [totalPages, setTotalPages] = useState(1);
 
-    const handleTabChange = (tab) => {
-        setActiveTab(tab);
-        localStorage.setItem("activeTab", tab);
-        if (tab === "books") {
-            fetchBooks(userId);
-        } else if (tab === "borrowed") {
-            fetchBorrowedBooks();
-        }else if (tab === "history") {
-            fetchBorrowedHistory();
-        }
-    };
-
-    useEffect(() => {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user && user.id) {
-            setMemberName(user.name);
-            setUserId(user.id);
-        }
-    }, []);
-
-
-    useEffect(() => {
-        if (userId && activeTab === "books") {
-            fetchBooks(userId,currentPage);
-            fetchCategories(userId);
-            fetchAuthors(userId);
-        }
-    }, [userId, activeTab, currentPage]);
-
-    useEffect(() => {
-        if (userId && activeTab === "borrowed") {
-            fetchBorrowedBooks();
-        }
-    }, [userId, activeTab]);
-
-    useEffect(() => {
-        if (activeTab === "history") {
-            fetchBorrowedHistory();
-        }
-    }, [activeTab]);
-
-
-
-    const searchBooks = async (query) => {
-        if (!query.trim()) {
-            fetchBooks(userId); 
-            return;
-        }
-    
-        try {
-            let apiUrl = `http://localhost:3000/api/member/books/search?user_id=${userId}&title=${query}`;
-            
-            if (selectedCategory) {
-                apiUrl += `&category=${selectedCategory}`;
-            }
-            if (selectedAuthor) {
-                apiUrl += `&author=${selectedAuthor}`;
-            }
-            const response = await axios.get(apiUrl);
-            setBooks(response.data.data.books || []);
-        } catch (error) {
-            console.error("Error searching books:", error);
-        }
-    };
-
-    const fetchCategories = async (userId) => {
-        try {
-            const apiUrl = `http://localhost:3000/api/member/books/categories?user_id=${userId}`;
-            const response = await axios.get(apiUrl);
-            setCategories(response.data.data.map(item => item.category));
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-        }
-    };
-
-    const fetchAuthors = async (userId) => {
-        try {
-            const apiUrl = `http://localhost:3000/api/member/books/authors?user_id=${userId}`;
-            const response = await axios.get(apiUrl);
-            setAuthors(response.data.data.map(a => a.author));
-        } catch (error) {
-            console.error("Error fetching authors:", error);
-        }
-    };
-
-
-    const fetchBooks = async (userId,page = 1, limit = 10, categories = selectedCategories, authors = selectedAuthors) => {
-        if (!userId) return;
-    
-        try {
-            let apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}&page=${page}&limit=${limit}`;
-    
-            if (categories.length > 0) {
-                apiUrl += `&category=${categories.join(",")}`;
-            }
-            if (authors.length > 0) {
-                apiUrl += `&author=${authors.join(",")}`;
-            }
-    
-            const response = await axios.get(apiUrl);
-            setBooks(response.data.data.books || []);
-            setTotalPages(response.data.data.totalPages);
-        } catch (error) {
-            console.error("Error fetching books:", error);
-        }
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login");
-    };
-
-    const handleCategoryChange = (category) => {
-        let updatedCategories = [...(selectedCategories || [])];
-    
-        if (updatedCategories.includes(category)) {
-            updatedCategories = updatedCategories.filter(c => c !== category);
-        } else {
-            updatedCategories.push(category);
-        }
-    
-        setSelectedCategories(updatedCategories);
-    
-        fetchBooks(userId, updatedCategories, selectedAuthors || []);
-    };
-    
-    const handleAuthorChange = (author) => {
-        setSelectedAuthors((prevSelectedAuthors) => {
-            let updatedAuthors;
-            
-            updatedAuthors = prevSelectedAuthors.includes(author)
-                ? prevSelectedAuthors.filter(a => a !== author)
-                : [...prevSelectedAuthors, author];
-    
-            fetchBooks(userId, selectedCategories, updatedAuthors); 
-            return updatedAuthors; 
-        });
-    };
-
-    const borrowBook = async (bookId) => {
-        if (borrowedBooks.has(bookId)) return; 
-    
-        try {
-            const apiUrl = `http://localhost:3000/api/member/books/borrow`;
-            const response = await axios.post(apiUrl, { book_id: bookId }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            });
-    
-            if (response.data.message === "Book borrowed successfully.") {
-                setBorrowedBooks(new Set([...borrowedBooks, bookId]));
-                toast.success("Book borrowed successfully!", { position: "top-right" });
-
-                fetchBooks(userId, selectedCategories, selectedAuthors);
-            }
-        } catch (error) {
-            toast.error("Failed to borrow book", { position: "top-right" });
-            console.error("Error borrowing book:", error);
-        }
-    };
-
-    const openBookDetails = (book) => {
-        setSelectedBook(book);
-        setShowModal(true);
-    };
-    
-    const closeBookDetails = () => {
-        setShowModal(false);
-        setSelectedBook(null);
-    };
-
-    const submitRating = async (rating) => {
-        if (!selectedBook || !userId) return;
-    
-        const token = localStorage.getItem("token"); 
-    
-        try {
-            const response = await axios.post(
-                "http://localhost:3000/api/member/books/review",
-                {
-                    book_id: selectedBook.id,
-                    rating: rating
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`, 
-                        "Content-Type": "application/json"
-                    }
-                }
-            );
-    
-            // Check if status code is 200 (Success)
-            if (response.status === 200) {
-                toast.success(response.data.message, { position: "top-right" });
-                setUserRating(rating);
+        const handleTabChange = (tab) => {
+            setActiveTab(tab);
+            localStorage.setItem("activeTab", tab);
+            if (tab === "books") {
                 fetchBooks(userId);
-
-                setTimeout(() => {
-                    setShowModal(false);
-                }, 500); 
-
-            } else {
-                toast.error("Failed to submit review", { position: "top-right" });
+            } else if (tab === "borrowed") {
+                fetchBorrowedBooks();
+            }else if (tab === "history") {
+                fetchBorrowedHistory();
             }
-    
-        } catch (error) {
-            console.error("Error submitting review:", error);
-            
-            // Display error message if available, otherwise show a generic error
-            const errorMessage = error.response?.data?.message || "Failed to submit review";
-            toast.error(errorMessage, { position: "top-right" });
-        }
-    };
+        };
 
-    const fetchBorrowedBooks = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:3000/api/member/books/borrowed", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
-            const books = response.data.data || [];  
-            setBorrowedBookList(books);
-            const borrowedBookIds = new Set(response.data.data.map(book => book.book_id));
-            setBorrowedBooks(borrowedBookIds);
-        } catch (error) {
-            console.error("Error fetching borrowed books:", error);
-        }
-    };
+        useEffect(() => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user && user.id) {
+                setMemberName(user.name);
+                setUserId(user.id);
+            }
+        }, []);
 
-    const returnBook = async (bookId,borrowedID) => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.post(
-                "http://localhost:3000/api/member/books/return",
-                { book_id: bookId, borrowed_id : borrowedID },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
+        useEffect(() => {
+            if (userId && activeTab === "books") {
+                fetchBooks(userId, currentPage, 10, selectedCategories, selectedAuthors);
+                fetchCategories(userId);
+                fetchAuthors(userId);
+            }
+        }, [userId, activeTab, currentPage, selectedCategories, selectedAuthors]);
+
+        useEffect(() => {
+            if (userId && activeTab === "borrowed") {
+                fetchBorrowedBooks();
+            }
+        }, [userId, activeTab]);
+
+        useEffect(() => {
+            if (activeTab === "history") {
+                fetchBorrowedHistory();
+            }
+        }, [activeTab]);
+
+
+
+        const searchBooks = async (query) => {
+            if (!query.trim()) {
+                fetchBooks(userId); 
+                return;
+            }
+        
+            try {
+                let apiUrl = `http://localhost:3000/api/member/books/search?user_id=${userId}&title=${query}`;
+                
+                if (selectedCategory) {
+                    apiUrl += `&category=${selectedCategory}`;
                 }
-            );
-    
-            toast.success(response.data.message, { position: "top-right" });
-            fetchBorrowedBooks(); // Refresh the table after returning the book
-        } catch (error) {
-            console.error("Error returning book:", error);
-            toast.error("Failed to return book", { position: "top-right" });
-        }
-    };
+                if (selectedAuthor) {
+                    apiUrl += `&author=${selectedAuthor}`;
+                }
+                const response = await axios.get(apiUrl);
+                setBooks(response.data.data.books || []);
+            } catch (error) {
+                console.error("Error searching books:", error);
+            }
+        };
 
-    const fetchBorrowedHistory = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:3000/api/member/books/history", {
-                headers: { Authorization: `Bearer ${token}` }
+        const fetchCategories = async (userId) => {
+            try {
+                const apiUrl = `http://localhost:3000/api/member/books/categories?user_id=${userId}`;
+                const response = await axios.get(apiUrl);
+                setCategories(response.data.data.map(item => item.category));
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
+        const fetchAuthors = async (userId) => {
+            try {
+                const apiUrl = `http://localhost:3000/api/member/books/authors?user_id=${userId}`;
+                const response = await axios.get(apiUrl);
+                setAuthors(response.data.data.map(a => a.author));
+            } catch (error) {
+                console.error("Error fetching authors:", error);
+            }
+        };
+
+
+        const fetchBooks = async (userId,page = 1, limit = 10, categories = selectedCategories, authors = selectedAuthors) => {
+            if (!userId) return;
+        
+            try {
+                let apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}&page=${page}&limit=${limit}`;
+        
+                if (categories.length > 0) {
+                    apiUrl += `&category=${categories.join(",")}`;
+                }
+
+                if (authors.length > 0) {
+                    apiUrl += `&author=${authors.join(",")}`;
+                }
+        
+                console.log("Fetching Books with URL:", apiUrl);
+
+                const response = await axios.get(apiUrl);
+                setBooks(response.data.data.books || []);
+                setTotalPages(response.data.data.totalPages);
+            } catch (error) {
+                console.error("Error fetching books:", error);
+            }
+        };
+
+        const handleLogout = () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            navigate("/login");
+        };
+
+        const handleCategoryChange = (category) => {
+            let updatedCategories = [...(selectedCategories || [])];
+        
+            if (updatedCategories.includes(category)) {
+                updatedCategories = updatedCategories.filter(c => c !== category);
+            } else {
+                updatedCategories.push(category);
+            }
+        
+            setSelectedCategories(updatedCategories);
+            setCurrentPage(1);
+        
+            fetchBooks(userId, 1, 10, updatedCategories, selectedAuthors || []);
+        };
+        
+        const handleAuthorChange = (author) => {
+            setSelectedAuthors((prevSelectedAuthors) => {
+                let updatedAuthors;
+                
+                updatedAuthors = prevSelectedAuthors.includes(author)
+                    ? prevSelectedAuthors.filter(a => a !== author)
+                    : [...prevSelectedAuthors, author];
+                
+                setCurrentPage(1); 
+                fetchBooks(userId, 1, 10, selectedCategories, updatedAuthors); 
+                return updatedAuthors; 
             });
-            setBorrowedHistory(response.data.data || []);
-        } catch (error) {
-            console.error("Error fetching borrowing history:", error);
-        }
-    };
+        };
+
+        const borrowBook = async (bookId) => {
+            if (borrowedBooks.has(bookId)) return; 
+        
+            try {
+                const apiUrl = `http://localhost:3000/api/member/books/borrow`;
+                const response = await axios.post(apiUrl, { book_id: bookId }, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
+                });
+        
+                if (response.data.message === "Book borrowed successfully.") {
+                    setBorrowedBooks(new Set([...borrowedBooks, bookId]));
+                    toast.success("Book borrowed successfully!", { position: "top-right" });
+
+                    fetchBooks(userId, selectedCategories, selectedAuthors);
+                }
+            } catch (error) {
+                toast.error("Failed to borrow book", { position: "top-right" });
+                console.error("Error borrowing book:", error);
+            }
+        };
+
+        const openBookDetails = (book) => {
+            setSelectedBook(book);
+            setShowModal(true);
+        };
+        
+        const closeBookDetails = () => {
+            setShowModal(false);
+            setSelectedBook(null);
+        };
+
+        const submitRating = async (rating) => {
+            if (!selectedBook || !userId) return;
+        
+            const token = localStorage.getItem("token"); 
+        
+            try {
+                const response = await axios.post(
+                    "http://localhost:3000/api/member/books/review",
+                    {
+                        book_id: selectedBook.id,
+                        rating: rating
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`, 
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+        
+                // Check if status code is 200 (Success)
+                if (response.status === 200) {
+                    toast.success(response.data.message, { position: "top-right" });
+                    setUserRating(rating);
+                    fetchBooks(userId);
+
+                    setTimeout(() => {
+                        setShowModal(false);
+                    }, 500); 
+
+                } else {
+                    toast.error("Failed to submit review", { position: "top-right" });
+                }
+        
+            } catch (error) {
+                console.error("Error submitting review:", error);
+                
+                // Display error message if available, otherwise show a generic error
+                const errorMessage = error.response?.data?.message || "Failed to submit review";
+                toast.error(errorMessage, { position: "top-right" });
+            }
+        };
+
+        const fetchBorrowedBooks = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await axios.get("http://localhost:3000/api/member/books/borrowed", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                const books = response.data.data || [];  
+                setBorrowedBookList(books);
+                const borrowedBookIds = new Set(response.data.data.map(book => book.book_id));
+                setBorrowedBooks(borrowedBookIds);
+            } catch (error) {
+                console.error("Error fetching borrowed books:", error);
+            }
+        };
+
+        const returnBook = async (bookId,borrowedID) => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await axios.post(
+                    "http://localhost:3000/api/member/books/return",
+                    { book_id: bookId, borrowed_id : borrowedID },
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }
+                );
+        
+                toast.success(response.data.message, { position: "top-right" });
+                fetchBorrowedBooks(); // Refresh the table after returning the book
+            } catch (error) {
+                console.error("Error returning book:", error);
+                toast.error("Failed to return book", { position: "top-right" });
+            }
+        };
+
+        const fetchBorrowedHistory = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await axios.get("http://localhost:3000/api/member/books/history", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setBorrowedHistory(response.data.data || []);
+            } catch (error) {
+                console.error("Error fetching borrowing history:", error);
+            }
+        };
 
     return (
         <div className="flex h-screen bg-gray-100">
@@ -458,23 +462,36 @@ function MemberDashboard() {
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-center mt-6">
+                        <div className="flex justify-center items-center space-x-2 mt-6">
                         <button
-                            className="px-4 py-2 mx-2 bg-gray-300 rounded disabled:opacity-50"
+                            className={`px-4 py-2 border rounded-md ${
+                                currentPage === 1 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-200"
+                            }`}
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
                         >
-                            Previous
+                            &lt;
                         </button>
-                        <span className="px-4 py-2 mx-2 text-lg font-semibold">
-                            Page {currentPage} of {totalPages}
-                        </span>
+                        {[...Array(totalPages)].map((_, index) => (
+                            <button
+                                key={index + 1}
+                                className={`px-4 py-2 border rounded-md ${
+                                    currentPage === index + 1 ? "bg-purple-500 text-white font-bold" : "bg-white text-gray-700 hover:bg-gray-200"
+                                }`}
+                                onClick={() => setCurrentPage(index + 1)}
+                            >
+                                {index + 1}
+                            </button>
+                        ))}
+
                         <button
-                            className="px-4 py-2 mx-2 bg-gray-300 rounded disabled:opacity-50"
+                            className={`px-4 py-2 border rounded-md ${
+                                currentPage === totalPages ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-200"
+                            }`}
                             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}
                         >
-                            Next
+                            &gt;
                         </button>
 
                     </div>

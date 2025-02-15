@@ -3,13 +3,13 @@ const db = require("../config/db");
 
 class MemberController{
     static async getAllBooks(req,res){
-        const page = req.query.page ? parseInt(req.query.page) : 1;
         const title = req.query.title;
         const author = req.query.author;
         const category = req.query.category;
         const user_id = req.query.user_id;
 
-        const limit = 10;
+        let limit = Number(req.query.limit) || 10;
+        let page = Number(req.query.page) || 1;
         const offset = (page - 1) * limit;
 
         if (!user_id) {  
@@ -36,7 +36,7 @@ class MemberController{
 
             if (category) {
                 const categoryArray = category.split(",");
-                const findInSetConditions = categoryArray.map(() => `   (?, category)`).join(" OR ");
+                const findInSetConditions = categoryArray.map(() => `FIND_IN_SET(?, category)`).join(" OR ");
 
                 query += ` AND (${findInSetConditions})`;
                 params.push(...categoryArray);
@@ -313,7 +313,7 @@ class MemberController{
     }
 
     static async getCategories(req,res){
-        const [categories] = await db.query("SELECT DISTINCT category FROM books");
+        const [categories] = await db.query("SELECT DISTINCT category FROM books and is_active = 1");
 
         if(categories.length == 0){
             return getResponseJson(res,400,"No categories available");
@@ -323,7 +323,7 @@ class MemberController{
     }
 
     static async getAuthors(req,res){
-        const [authors] = await db.query("SELECT DISTINCT author FROM books");
+        const [authors] = await db.query("SELECT DISTINCT author FROM books and is_active = 1");
 
         if(authors.length == 0){
             return getResponseJson(res,400,"No authors available");
