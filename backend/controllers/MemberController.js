@@ -313,7 +313,7 @@ class MemberController{
     }
 
     static async getCategories(req,res){
-        const [categories] = await db.query("SELECT DISTINCT category FROM books and is_active = 1");
+        const [categories] = await db.query("SELECT DISTINCT category FROM books WHERE is_active = 1");
 
         if(categories.length == 0){
             return getResponseJson(res,400,"No categories available");
@@ -323,7 +323,7 @@ class MemberController{
     }
 
     static async getAuthors(req,res){
-        const [authors] = await db.query("SELECT DISTINCT author FROM books and is_active = 1");
+        const [authors] = await db.query("SELECT DISTINCT author FROM books WHERE is_active = 1");
 
         if(authors.length == 0){
             return getResponseJson(res,400,"No authors available");
