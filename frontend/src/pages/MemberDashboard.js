@@ -27,6 +27,8 @@ function MemberDashboard() {
     const [userRating, setUserRating] = useState(0);
     const [borrowedBookList, setBorrowedBookList] = useState([]);
     const [borrowedHistory, setBorrowedHistory] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -48,19 +50,14 @@ function MemberDashboard() {
         }
     }, []);
 
-    useEffect(() => {
-        if (userId && activeTab === "books") {
-            fetchBooks(userId);
-        }
-    }, [userId, activeTab]);
 
     useEffect(() => {
         if (userId && activeTab === "books") {
-            fetchBooks(userId);
+            fetchBooks(userId,currentPage);
             fetchCategories(userId);
             fetchAuthors(userId);
         }
-    }, [userId, activeTab]);
+    }, [userId, activeTab, currentPage]);
 
     useEffect(() => {
         if (userId && activeTab === "borrowed") {
@@ -119,11 +116,11 @@ function MemberDashboard() {
     };
 
 
-    const fetchBooks = async (userId,categories = selectedCategories, authors = selectedAuthors) => {
+    const fetchBooks = async (userId,page = 1, limit = 10, categories = selectedCategories, authors = selectedAuthors) => {
         if (!userId) return;
     
         try {
-            let apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}`;
+            let apiUrl = `http://localhost:3000/api/member/books?user_id=${userId}&page=${page}&limit=${limit}`;
     
             if (categories.length > 0) {
                 apiUrl += `&category=${categories.join(",")}`;
@@ -134,6 +131,7 @@ function MemberDashboard() {
     
             const response = await axios.get(apiUrl);
             setBooks(response.data.data.books || []);
+            setTotalPages(response.data.data.totalPages);
         } catch (error) {
             console.error("Error fetching books:", error);
         }
@@ -234,7 +232,7 @@ function MemberDashboard() {
                 setTimeout(() => {
                     setShowModal(false);
                 }, 500); 
-                
+
             } else {
                 toast.error("Failed to submit review", { position: "top-right" });
             }
@@ -460,6 +458,26 @@ function MemberDashboard() {
                                 </div>
                             )}
                         </div>
+                        <div className="flex justify-center mt-6">
+                        <button
+                            className="px-4 py-2 mx-2 bg-gray-300 rounded disabled:opacity-50"
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </button>
+                        <span className="px-4 py-2 mx-2 text-lg font-semibold">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            className="px-4 py-2 mx-2 bg-gray-300 rounded disabled:opacity-50"
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </button>
+
+                    </div>
                     </div>
                     </div>
                 )}
