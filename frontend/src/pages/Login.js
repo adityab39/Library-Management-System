@@ -38,11 +38,8 @@ function Login() {
           localStorage.setItem("user", JSON.stringify(userData));
         }
   
-        if (user.role_id === 2) {
-          navigate("/member-dashboard"); 
-        } else {
-          navigate("/dashboard"); 
-        }
+        navigate("/member-dashboard"); 
+        
       } else {
         alert("Invalid credentials");
       }

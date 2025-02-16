@@ -4,6 +4,7 @@ import { FiLogOut } from "react-icons/fi";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
     function MemberDashboard() {
         const navigate = useNavigate();
@@ -29,6 +30,11 @@ import "react-toastify/dist/ReactToastify.css";
         const [borrowedHistory, setBorrowedHistory] = useState([]);
         const [currentPage, setCurrentPage] = useState(1);
         const [totalPages, setTotalPages] = useState(1);
+        const [roleId, setRoleId] = useState(null);
+        const [showAddBookModal, setShowAddBookModal] = useState(false);
+        const [menuOpen, setMenuOpen] = useState(null);
+
+
 
         const handleTabChange = (tab) => {
             setActiveTab(tab);
@@ -47,6 +53,7 @@ import "react-toastify/dist/ReactToastify.css";
             if (user && user.id) {
                 setMemberName(user.name);
                 setUserId(user.id);
+                setRoleId(user.role_id);
             }
         }, []);
 
@@ -297,6 +304,25 @@ import "react-toastify/dist/ReactToastify.css";
             }
         };
 
+
+        const openAddBookModal = () => {
+            setShowAddBookModal(true);
+        };
+
+        const toggleMenu = (bookId) => {
+            setMenuOpen(menuOpen === bookId ? null : bookId);
+        };
+        
+        const editBook = (book) => {
+            console.log("Editing book:", book);
+            // Open edit modal
+        };
+        
+        const deleteBook = (bookId) => {
+            console.log("Deleting book with ID:", bookId);
+            // Call API to delete book
+        };
+
     return (
         <div className="flex h-screen bg-gray-100">
             <ToastContainer />
@@ -363,7 +389,19 @@ import "react-toastify/dist/ReactToastify.css";
                             }}
                             className="mb-4 p-2 border border-gray-300 rounded w-full"
                         />
-                        <div className="flex items-center gap-4 mb-4 justify-end">
+
+                        <div className="flex items-center gap-4 mt-4 justify-between">
+                        {roleId === 20 && (
+                            <button 
+                            className="px-4 py-2 border border-purple-600 text-purple-600 bg-white rounded-md hover:bg-purple-100 flex items-center justify-center gap-2 w-[140px] h-[44px]" 
+                                onClick={() => openAddBookModal()}
+                            >
+                                <span className="text-lg font-bold">+</span> 
+                                <span className="font-medium">Add Books</span>
+                            </button>
+                        )}
+
+                        <div className="flex gap-4">
                         <div className="relative">
                         <button 
                             className="px-4 py-2 border rounded-md text-gray-700 bg-white"
@@ -418,6 +456,8 @@ import "react-toastify/dist/ReactToastify.css";
                             )}
                     </div>
                     </div>
+
+                    </div>
                     
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {books.length > 0 ? (
@@ -428,6 +468,43 @@ import "react-toastify/dist/ReactToastify.css";
                                     className="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between h-full  
         transform transition-transform duration-200 hover:scale-105 hover:shadow-lg cursor-pointer"
                                     >
+                                    {/* Admin Three Dots Menu */}
+
+                                    {roleId === 20 && (
+                                        <div className="absolute top-2 right-2">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleMenu(book.id);
+                                                }} 
+                                                className="text-gray-700 hover:text-gray-900 text-2xl p-1 rounded-full focus:outline-none"
+                                            >
+                                                <BsThreeDotsVertical />
+                                            </button>
+                                            {menuOpen === book.id && (
+                                                <div className="absolute right-0 mt-2 w-32 bg-white border rounded-md shadow-md z-50">
+                                                    <button 
+                                                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            editBook(book);
+                                                        }}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button 
+                                                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            deleteBook(book.id);
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     <img 
                                         src={book.cover_image}
                                         alt={book.title} 
