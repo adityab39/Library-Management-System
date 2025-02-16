@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FiUpload, FiX } from "react-icons/fi";
 
     function MemberDashboard() {
         const navigate = useNavigate();
@@ -33,8 +34,18 @@ import { BsThreeDotsVertical } from "react-icons/bs";
         const [roleId, setRoleId] = useState(null);
         const [showAddBookModal, setShowAddBookModal] = useState(false);
         const [menuOpen, setMenuOpen] = useState(null);
-
-
+        const [newBook, setNewBook] = useState({
+            title: "",
+            author: "",
+            category: "",
+            description: "",
+            totalCopies: "",
+            availableCopies: "",
+            publicationYear: "",
+            isbn: "",
+            language: "",
+            coverImage: null,
+        });
 
         const handleTabChange = (tab) => {
             setActiveTab(tab);
@@ -47,6 +58,15 @@ import { BsThreeDotsVertical } from "react-icons/bs";
                 fetchBorrowedHistory();
             }
         };
+
+        const handleInputChange = (e) => {
+            setNewBook({ ...newBook, [e.target.name]: e.target.value });
+        };
+
+        const handleFileChange = (e) => {
+            setNewBook({ ...newBook, coverImage: e.target.files[0] });
+        };
+
 
         useEffect(() => {
             const user = JSON.parse(localStorage.getItem("user"));
@@ -309,6 +329,8 @@ import { BsThreeDotsVertical } from "react-icons/bs";
             setShowAddBookModal(true);
         };
 
+        const closeAddBookModal = () => setShowAddBookModal(false);
+
         const toggleMenu = (bookId) => {
             setMenuOpen(menuOpen === bookId ? null : bookId);
         };
@@ -321,6 +343,30 @@ import { BsThreeDotsVertical } from "react-icons/bs";
         const deleteBook = (bookId) => {
             console.log("Deleting book with ID:", bookId);
             // Call API to delete book
+        };
+
+
+        const handleAddBook = async () => {
+            const formData = new FormData();
+            Object.keys(newBook).forEach((key) => {
+                formData.append(key, newBook[key]);
+            });
+        
+            try {
+                const response = await axios.post("http://localhost:3000/api/admin/books/add", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+        
+                if (response.status === 200) {
+                    toast.success("Book added successfully!");
+                    setShowAddBookModal(false);
+                } else {
+                    toast.error("Failed to add book.");
+                }
+            } catch (error) {
+                console.error("Error adding book:", error);
+                toast.error("An error occurred.");
+            }
         };
 
     return (
@@ -400,6 +446,105 @@ import { BsThreeDotsVertical } from "react-icons/bs";
                                 <span className="font-medium">Add Books</span>
                             </button>
                         )}
+
+                        {showAddBookModal && (
+                                    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+                                        <div className="bg-white p-6 rounded-lg shadow-lg w-[500px] relative animate-fadeIn">
+                                            
+                                            {/* Close Button */}
+                                            <button 
+                                                className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
+                                                onClick={closeAddBookModal}
+                                            >
+                                                <FiX size={24} />
+                                            </button>
+
+                                            <h2 className="text-2xl font-semibold mb-4 text-center">📚 Add New Book</h2>
+
+                                            {/* Floating Input Fields */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="relative">
+                                                    <input type="text" name="title" value={newBook.title} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Title</label>
+                                                </div>
+
+                                                <div className="relative">
+                                                    <input type="text" name="author" value={newBook.author} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Author</label>
+                                                </div>
+
+                                                <div className="relative col-span-2">
+                                                    <input type="text" name="category" value={newBook.category} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Category</label>
+                                                </div>
+
+                                                <div className="relative col-span-2">
+                                                    <textarea name="description" value={newBook.description} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Description</label>
+                                                </div>
+
+                                                <div className="relative">
+                                                    <input type="number" name="totalCopies" value={newBook.totalCopies} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Total Copies</label>
+                                                </div>
+
+                                                <div className="relative">
+                                                    <input type="number" name="availableCopies" value={newBook.availableCopies} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Available Copies</label>
+                                                </div>
+
+                                                <div className="relative">
+                                                    <input type="number" name="publicationYear" value={newBook.publicationYear} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Publication Year</label>
+                                                </div>
+
+                                                <div className="relative">
+                                                    <input type="text" name="isbn" value={newBook.isbn} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">ISBN</label>
+                                                </div>
+
+                                                <div className="relative col-span-2">
+                                                    <input type="text" name="language" value={newBook.language} onChange={handleInputChange}
+                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
+                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Language</label>
+                                                </div>
+                                            </div>
+
+                                            {/* File Upload */}
+                                            <div className="mb-4">
+                                                <label className="block mb-2 text-gray-700">Cover Image</label>
+                                                <div className="border-dashed border-2 border-gray-300 p-4 rounded-lg text-center">
+                                                    <input type="file" name="coverImage" accept="image/*" onChange={handleFileChange}
+                                                        className="hidden" id="fileUpload" />
+                                                    <label htmlFor="fileUpload" className="cursor-pointer text-purple-600 flex items-center justify-center">
+                                                        <FiUpload size={20} className="mr-2" />
+                                                        {newBook.coverImage ? newBook.coverImage.name : "Upload Cover Image"}
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            {/* Buttons */}
+                                            <div className="flex justify-between mt-4">
+                                                <button className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                                    onClick={closeAddBookModal}>
+                                                    Cancel
+                                                </button>
+                                                <button className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                                                    onClick={handleAddBook}>
+                                                    Add Book
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                         <div className="flex gap-4">
                         <div className="relative">
