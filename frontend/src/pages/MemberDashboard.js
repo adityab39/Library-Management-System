@@ -61,6 +61,7 @@ import { FiUpload, FiX } from "react-icons/fi";
 
         const handleInputChange = (e) => {
             setNewBook({ ...newBook, [e.target.name]: e.target.value });
+
         };
 
         const handleFileChange = (e) => {
@@ -346,26 +347,49 @@ import { FiUpload, FiX } from "react-icons/fi";
         };
 
 
-        const handleAddBook = async () => {
-            const formData = new FormData();
-            Object.keys(newBook).forEach((key) => {
-                formData.append(key, newBook[key]);
-            });
+        const addBook = async () => {
+            const token = localStorage.getItem("token"); // Get the Bearer Token
+        
+            if (!token) {
+                alert("Unauthorized! Please log in again.");
+                return;
+            }
+        
+            const bookData = {
+                title: newBook.title,
+                author: newBook.author,
+                category: newBook.category,
+                publication_year: newBook.publicationYear,
+                isbn: newBook.isbn,
+                language: newBook.language,
+                total_copies: newBook.totalCopies,
+                available_copies: newBook.availableCopies,
+                description: newBook.description
+            };
         
             try {
-                const response = await axios.post("http://localhost:3000/api/admin/books/add", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                const response = await axios.post(
+                    "http://localhost:3000/api/admin/add-book",
+                    bookData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`, // Attach Bearer Token
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
         
                 if (response.status === 200) {
-                    toast.success("Book added successfully!");
-                    setShowAddBookModal(false);
+                    toast.success("Book added successfully!", { position: "top-right" });
+                    fetchBooks(userId); // Refresh book list
+                    setShowAddBookModal(false); // Close the modal
                 } else {
-                    toast.error("Failed to add book.");
+                    toast.error("Failed to add book.", { position: "top-right" });
                 }
             } catch (error) {
                 console.error("Error adding book:", error);
-                toast.error("An error occurred.");
+                const errorMessage = error.response?.data?.message || "Error adding book";
+                toast.error(errorMessage, { position: "top-right" });
             }
         };
 
@@ -463,60 +487,117 @@ import { FiUpload, FiX } from "react-icons/fi";
 
                                             {/* Floating Input Fields */}
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div className="relative">
-                                                    <input type="text" name="title" value={newBook.title} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Title</label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input type="text" name="author" value={newBook.author} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Author</label>
-                                                </div>
-
-                                                <div className="relative col-span-2">
-                                                    <input type="text" name="category" value={newBook.category} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Category</label>
-                                                </div>
-
-                                                <div className="relative col-span-2">
-                                                    <textarea name="description" value={newBook.description} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Description</label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input type="number" name="totalCopies" value={newBook.totalCopies} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Total Copies</label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input type="number" name="availableCopies" value={newBook.availableCopies} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Available Copies</label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input type="number" name="publicationYear" value={newBook.publicationYear} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Publication Year</label>
-                                                </div>
-
-                                                <div className="relative">
-                                                    <input type="text" name="isbn" value={newBook.isbn} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">ISBN</label>
-                                                </div>
-
-                                                <div className="relative col-span-2">
-                                                    <input type="text" name="language" value={newBook.language} onChange={handleInputChange}
-                                                        className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300" placeholder=" " />
-                                                    <label className="absolute left-3 top-2 text-gray-500 text-sm">Language</label>
-                                                </div>
+                                            {/* Title */}
+                                            <div>
+                                                <input 
+                                                    type="text" 
+                                                    name="title" 
+                                                    value={newBook.title} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Title" 
+                                                />
                                             </div>
+
+                                            {/* Author */}
+                                            <div>
+                                                <input 
+                                                    type="text" 
+                                                    name="author" 
+                                                    value={newBook.author} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Author" 
+                                                />
+                                            </div>
+
+                                            {/* Category */}
+                                            <div className="col-span-2">
+                                                <input 
+                                                    type="text" 
+                                                    name="category" 
+                                                    value={newBook.category} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Category" 
+                                                />
+                                            </div>
+
+                                            {/* Description */}
+                                            <div className="col-span-2">
+                                                <textarea 
+                                                    name="description" 
+                                                    value={newBook.description} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Description" 
+                                                />
+                                            </div>
+
+                                            {/* Total Copies */}
+                                            <div>
+                                                <input 
+                                                    type="number" 
+                                                    name="totalCopies" 
+                                                    value={newBook.totalCopies} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Total Copies"
+                                                    min="0" 
+                                                />
+                                            </div>
+
+                                            {/* Available Copies */}
+                                            <div>
+                                                <input 
+                                                    type="number" 
+                                                    name="availableCopies" 
+                                                    value={newBook.availableCopies} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Available Copies"
+                                                    min="0"
+                                                />
+                                            </div>
+
+                                            {/* Publication Year */}
+                                            <div>
+                                                <input 
+                                                    type="number" 
+                                                    name="publicationYear" 
+                                                    value={newBook.publicationYear} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Publication Year" 
+                                                    min="1800"
+                                                    max={new Date().getFullYear()}
+                                                />
+                                            </div>
+
+                                            {/* ISBN */}
+                                            <div>
+                                                <input 
+                                                    type="text" 
+                                                    name="isbn" 
+                                                    value={newBook.isbn} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="ISBN" 
+                                                />
+                                            </div>
+
+                                            {/* Language */}
+                                            <div className="col-span-2">
+                                                <input 
+                                                    type="text" 
+                                                    name="language" 
+                                                    value={newBook.language} 
+                                                    onChange={handleInputChange}
+                                                    className="w-full p-3 border rounded-lg focus:ring focus:ring-purple-300"
+                                                    placeholder="Language" 
+                                                />
+                                            </div>
+                                        </div>
 
                                             {/* File Upload */}
                                             <div className="mb-4">
@@ -538,7 +619,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                                                     Cancel
                                                 </button>
                                                 <button className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-                                                    onClick={handleAddBook}>
+                                                    onClick={addBook}>
                                                     Add Book
                                                 </button>
                                             </div>

@@ -34,8 +34,8 @@ class AdminController{
         }
 
         await db.query(
-            "INSERT INTO books (title, author, category, publication_year, isbn, language, total_copies, available_copies, cover_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [title, author, category, publication_year, isbn, language, total_copies, available_copies, cover_image]
+            "INSERT INTO books (title, author, category, publication_year, isbn, language, total_copies, available_copies, description, cover_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [title, author, category, publication_year, isbn, language, total_copies, available_copies, description, cover_image]
         );
         
         return getResponseJson(res, 200, "Book added successfully.", { title, cover_image });
