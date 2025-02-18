@@ -64,8 +64,9 @@ import { FiUpload, FiX } from "react-icons/fi";
 
         };
 
-        const handleFileChange = (e) => {
-            setNewBook({ ...newBook, coverImage: e.target.files[0] });
+        const handleFileChange = (event) => {
+            const file = event.target.files[0];
+            setNewBook((prevBook) => ({ ...prevBook, coverImage: file }));
         };
 
 
@@ -348,48 +349,74 @@ import { FiUpload, FiX } from "react-icons/fi";
 
 
         const addBook = async () => {
-            const token = localStorage.getItem("token"); // Get the Bearer Token
+            const token = localStorage.getItem("token"); // Get the Bearer Token once
         
             if (!token) {
                 alert("Unauthorized! Please log in again.");
                 return;
             }
         
-            const bookData = {
-                title: newBook.title,
-                author: newBook.author,
-                category: newBook.category,
-                publication_year: newBook.publicationYear,
-                isbn: newBook.isbn,
-                language: newBook.language,
-                total_copies: newBook.totalCopies,
-                available_copies: newBook.availableCopies,
-                description: newBook.description
-            };
+            // Check if all fields are filled
+            if (!newBook.title || !newBook.author || !newBook.category || !newBook.publicationYear ||
+                !newBook.isbn || !newBook.language || !newBook.totalCopies || !newBook.availableCopies ||
+                !newBook.description || !newBook.coverImage) {
+                toast.error("All fields, including the cover image, are required!", { position: "top-right" });
+                return;
+            }
+        
+            const formData = new FormData();
+            formData.append("title", newBook.title);
+            formData.append("author", newBook.author);
+            formData.append("category", newBook.category);
+            formData.append("publication_year", newBook.publicationYear);
+            formData.append("isbn", newBook.isbn);
+            formData.append("language", newBook.language);
+            formData.append("total_copies", newBook.totalCopies);
+            formData.append("available_copies", newBook.availableCopies);
+            formData.append("description", newBook.description);
+            
+            if (newBook.coverImage instanceof File) {
+                formData.append("cover_image", newBook.coverImage); // Attach the file
+            } else {
+                toast.error("Please upload a valid image file!", { position: "top-right" });
+                return;
+            }
+        
+            console.log("Sending FormData:", formData.get("cover_image")); // Debugging
         
             try {
-                const response = await axios.post(
-                    "http://localhost:3000/api/admin/add-book",
-                    bookData,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`, // Attach Bearer Token
-                            "Content-Type": "application/json"
-                        }
+                const response = await axios.post("http://localhost:3000/api/admin/add-book", formData, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data"
                     }
-                );
+                });
         
                 if (response.status === 200) {
                     toast.success("Book added successfully!", { position: "top-right" });
-                    fetchBooks(userId); // Refresh book list
-                    setShowAddBookModal(false); // Close the modal
-                } else {
-                    toast.error("Failed to add book.", { position: "top-right" });
+                    fetchBooks(); // Refresh book list
+                    setShowAddBookModal(false); // Close modal
                 }
             } catch (error) {
                 console.error("Error adding book:", error);
-                const errorMessage = error.response?.data?.message || "Error adding book";
-                toast.error(errorMessage, { position: "top-right" });
+                if (error.response) {
+                    const { status, data } = error.response;
+        
+                    // If status code is 500, show "Error adding book"
+                    if (status === 500) {
+                        toast.error("Error adding book", { position: "top-right" });
+                    } 
+                    // If status code is 400, show the error message from response
+                    else if (status === 400) {
+                        toast.error(data.message || "Invalid request", { position: "top-right" });
+                    } 
+                    // Handle other errors
+                    else {
+                        toast.error("Failed to add book", { position: "top-right" });
+                    }
+                } else {
+                    toast.error("Network error. Please try again.", { position: "top-right" });
+                }
             }
         };
 

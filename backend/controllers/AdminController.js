@@ -30,7 +30,7 @@ class AdminController{
 
         let cover_image = null;
         if (req.file) {
-            cover_image = `uploads/books/${req.file.filename}`;
+            cover_image = `http://localhost:3000/uploads/books/${req.file.filename}`;
         }
 
         await db.query(
