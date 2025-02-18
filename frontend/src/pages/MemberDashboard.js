@@ -35,6 +35,8 @@ import { FiUpload, FiX } from "react-icons/fi";
         const [showAddBookModal, setShowAddBookModal] = useState(false);
         const [menuOpen, setMenuOpen] = useState(null);
         const menuRef = useRef(null);
+        const categoryRef = useRef(null);
+        const authorRef = useRef(null);
 
         const [newBook, setNewBook] = useState({
             title: "",
@@ -75,6 +77,12 @@ import { FiUpload, FiX } from "react-icons/fi";
             const handleClickOutside = (event) => {
                 if (menuRef.current && !menuRef.current.contains(event.target)) {
                     setMenuOpen(null); // Close menu if clicked outside
+                }
+                if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+                    setShowCategoryDropdown(false); // Close category dropdown
+                }
+                if (authorRef.current && !authorRef.current.contains(event.target)) {
+                    setShowAuthorDropdown(false); // Close author dropdown
                 }
             };
         
@@ -683,7 +691,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                                 )}
 
                         <div className="flex gap-4">
-                        <div className="relative">
+                        <div className="relative" ref={categoryRef} >
                         <button 
                             className="px-4 py-2 border rounded-md text-gray-700 bg-white"
                             onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
@@ -710,7 +718,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                             )}
                         </div>
 
-                        <div className="relative">
+                        <div className="relative" ref={authorRef} >
                             <button 
                                 className="px-4 py-2 border rounded-md text-gray-700 bg-white"
                                 onClick={() => setShowAuthorDropdown(!showAuthorDropdown)}
