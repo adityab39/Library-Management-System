@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 import axios from "axios";
@@ -34,6 +34,8 @@ import { FiUpload, FiX } from "react-icons/fi";
         const [roleId, setRoleId] = useState(null);
         const [showAddBookModal, setShowAddBookModal] = useState(false);
         const [menuOpen, setMenuOpen] = useState(null);
+        const menuRef = useRef(null);
+
         const [newBook, setNewBook] = useState({
             title: "",
             author: "",
@@ -68,6 +70,19 @@ import { FiUpload, FiX } from "react-icons/fi";
             const file = event.target.files[0];
             setNewBook((prevBook) => ({ ...prevBook, coverImage: file }));
         };
+
+        useEffect(() => {
+            const handleClickOutside = (event) => {
+                if (menuRef.current && !menuRef.current.contains(event.target)) {
+                    setMenuOpen(null); // Close menu if clicked outside
+                }
+            };
+        
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, []);
 
 
         useEffect(() => {
@@ -394,6 +409,19 @@ import { FiUpload, FiX } from "react-icons/fi";
         
                 if (response.status === 200) {
                     toast.success("Book added successfully!", { position: "top-right" });
+                    setNewBook({
+                        title: "",
+                        author: "",
+                        category: "",
+                        description: "",
+                        totalCopies: "",
+                        availableCopies: "",
+                        publicationYear: "",
+                        isbn: "",
+                        language: "",
+                        coverImage: null,
+                    });
+
                     fetchBooks(); // Refresh book list
                     setShowAddBookModal(false); // Close modal
                 }
@@ -724,16 +752,19 @@ import { FiUpload, FiX } from "react-icons/fi";
                                     {/* Admin Three Dots Menu */}
 
                                     {roleId === 20 && (
-                                        <div className="absolute top-2 right-2">
+                                        <div className="absolute top-2 right-2 menu-container" ref={menuRef}>
+                                            {/* Three Dots Button */}
                                             <button 
                                                 onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleMenu(book.id);
+                                                    e.stopPropagation(); // Prevent immediate closing
+                                                    setMenuOpen(menuOpen === book.id ? null : book.id);
                                                 }} 
                                                 className="text-gray-700 hover:text-gray-900 text-2xl p-1 rounded-full focus:outline-none"
                                             >
                                                 <BsThreeDotsVertical />
                                             </button>
+
+                                            {/* Dropdown Menu */}
                                             {menuOpen === book.id && (
                                                 <div className="absolute right-0 mt-2 w-32 bg-white border rounded-md shadow-md z-50">
                                                     <button 
