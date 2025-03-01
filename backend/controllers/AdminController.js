@@ -50,11 +50,15 @@ class AdminController{
         const author = req.body.author;
         const category = req.body.category;
         const description = req.body.description;
-        const total_copies = req.body.total_copies;
-        const available_copies = req.body.available_copies;
-        const publication_year = req.body.publication_year;
+        const publication_year = Number(req.body.publication_year) || 0;
+        const total_copies = Number(req.body.total_copies) || 0;
+        const available_copies = Number(req.body.available_copies) || 0;
         const isbn = req.body.isbn;
         const language = req.body.language;
+
+        if (available_copies > total_copies) {
+            return getResponseJson(res, 400, "Available copies cannot be more than total copies.");
+        }
 
         if (!title || !author || !category || !total_copies || !available_copies || !publication_year || !isbn || !language || !description) {
             return getResponseJson(res, 400, "All fields are required.");

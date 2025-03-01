@@ -37,6 +37,8 @@ import { FiUpload, FiX } from "react-icons/fi";
         const menuRef = useRef(null);
         const categoryRef = useRef(null);
         const authorRef = useRef(null);
+        const [showEditModal, setShowEditModal] = useState(false);
+        const [bookToEdit, setBookToEdit] = useState(null);
 
         const [newBook, setNewBook] = useState({
             title: "",
@@ -73,24 +75,24 @@ import { FiUpload, FiX } from "react-icons/fi";
             setNewBook((prevBook) => ({ ...prevBook, coverImage: file }));
         };
 
-        useEffect(() => {
-            const handleClickOutside = (event) => {
-                if (menuRef.current && !menuRef.current.contains(event.target)) {
-                    setMenuOpen(null); // Close menu if clicked outside
-                }
-                if (categoryRef.current && !categoryRef.current.contains(event.target)) {
-                    setShowCategoryDropdown(false); // Close category dropdown
-                }
-                if (authorRef.current && !authorRef.current.contains(event.target)) {
-                    setShowAuthorDropdown(false); // Close author dropdown
-                }
-            };
+        // useEffect(() => {
+        //     const handleClickOutside = (event) => {
+        //         if (menuRef.current && !menuRef.current.contains(event.target)) {
+        //             setMenuOpen(null); // Close menu if clicked outside
+        //         }
+        //         if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        //             setShowCategoryDropdown(false); // Close category dropdown
+        //         }
+        //         if (authorRef.current && !authorRef.current.contains(event.target)) {
+        //             setShowAuthorDropdown(false); // Close author dropdown
+        //         }
+        //     };
         
-            document.addEventListener("mousedown", handleClickOutside);
-            return () => {
-                document.removeEventListener("mousedown", handleClickOutside);
-            };
-        }, []);
+        //     document.addEventListener("mousedown", handleClickOutside);
+        //     return () => {
+        //         document.removeEventListener("mousedown", handleClickOutside);
+        //     };
+        // }, []);
 
 
         useEffect(() => {
@@ -361,8 +363,14 @@ import { FiUpload, FiX } from "react-icons/fi";
         };
         
         const editBook = (book) => {
-            console.log("Editing book:", book);
-            // Open edit modal
+            if (!book) {
+                console.error("❌ No book passed to edit!");
+                return;
+            }
+        
+            console.log("📗 Editing book:", book);  
+            setBookToEdit(book);   
+            setShowEditModal(true); 
         };
         
         const deleteBook = (bookId) => {
@@ -453,6 +461,51 @@ import { FiUpload, FiX } from "react-icons/fi";
                 } else {
                     toast.error("Network error. Please try again.", { position: "top-right" });
                 }
+            }
+        };
+
+        const updateBookDetails = async (updatedBook) => {
+            const token = localStorage.getItem("token");
+    
+            const sanitizedBook = {
+                ...updatedBook,
+                publication_year: Number(updatedBook.publication_year) || 0, 
+                total_copies: Number(updatedBook.total_copies) || 0,
+                available_copies: Number(updatedBook.available_copies) || 0,
+            };
+        
+            try {
+                const formData = new FormData();
+                formData.append("title", sanitizedBook.title);
+                formData.append("author", sanitizedBook.author);
+                formData.append("category", sanitizedBook.category);
+                formData.append("publication_year", sanitizedBook.publication_year);
+                formData.append("isbn", sanitizedBook.isbn);
+                formData.append("language", sanitizedBook.language);
+                formData.append("total_copies", sanitizedBook.total_copies);
+                formData.append("available_copies", sanitizedBook.available_copies);
+                formData.append("description", sanitizedBook.description);
+        
+                if (updatedBook.coverImage instanceof File) {
+                    formData.append("cover_image", updatedBook.coverImage);
+                }
+        
+                const response = await axios.put(
+                    `http://localhost:3000/api/admin/update-book/${updatedBook.id}`,
+                    formData,
+                    { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+                );
+        
+                if (response.status === 200) {
+                    toast.success("Book updated successfully!");
+                    fetchBooks(userId);  
+                    setShowEditModal(false); 
+                } else {
+                    toast.error(response.data.message || "Failed to update book.");
+                }
+            } catch (error) {
+                console.error("Error updating book:", error);
+                toast.error(error.response?.data?.message || "Failed to update book.");
             }
         };
 
@@ -1006,6 +1059,140 @@ import { FiUpload, FiX } from "react-icons/fi";
                         </div>
                     </div>
                 </div>
+            )}
+                {showEditModal && bookToEdit && (
+                    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+                        <div className="bg-white p-8 rounded-lg shadow-lg w-[800px] relative flex">
+                            
+                            {/* Close Button */}
+                            <button 
+                                className="absolute top-3 right-3 text-gray-500 hover:text-red-600"
+                                onClick={() => setShowEditModal(false)}
+                            >
+                                ❌
+                            </button>
+
+                            {/* Left Side - Book Cover Image */}
+                            <div className="w-1/3 flex flex-col items-center">
+                                <img 
+                                    src={bookToEdit.cover_image || "/default-book-cover.jpg"} 
+                                    alt="Book Cover"
+                                    className="w-full h-auto rounded-lg shadow-md object-cover"
+                                />
+                                
+                                {/* Admins Can Change the Image */}
+                                {roleId === 20 && (
+                                    <div className="mt-4">
+                                        <label className="block text-gray-700 font-medium">Change Cover Image:</label>
+                                        <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            onChange={(e) => setBookToEdit({ ...bookToEdit, cover_image: e.target.files[0] })}
+                                            className="mt-2 border p-2 rounded-lg w-full"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right Side - Book Details Form */}
+                            <div className="w-2/3 pl-6 flex flex-col">
+                                <h2 className="text-2xl font-semibold mb-4">✏️ Edit Book Details</h2>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input 
+                                        type="text" 
+                                        name="title" 
+                                        value={bookToEdit.title} 
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, title: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Title"
+                                    />
+
+                                    <input 
+                                        type="text" 
+                                        name="author" 
+                                        value={bookToEdit.author} 
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, author: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Author"
+                                    />
+
+                                    <input 
+                                        type="text" 
+                                        name="category" 
+                                        value={bookToEdit.category} 
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, category: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Category"
+                                    />
+
+                                    <input 
+                                        type="number" 
+                                        name="totalCopies" 
+                                        value={bookToEdit.total_copies} 
+                                        min="0"
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, total_copies: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Total Copies"
+                                    />
+
+                                    <input 
+                                        type="number" 
+                                        name="availableCopies" 
+                                        value={bookToEdit.available_copies} 
+                                        min="0"
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, available_copies: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Available Copies"
+                                    />
+
+                                    <input 
+                                        type="number" 
+                                        name="publicationYear" 
+                                        value={bookToEdit.publication_year} 
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, publication_year: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Publication Year"
+                                    />
+
+                                    <input 
+                                        type="text" 
+                                        name="isbn" 
+                                        value={bookToEdit.isbn} 
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, isbn: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="ISBN"
+                                    />
+
+                                    <input 
+                                        type="text" 
+                                        name="language" 
+                                        value={bookToEdit.language} 
+                                        onChange={(e) => setBookToEdit({ ...bookToEdit, language: e.target.value })}
+                                        className="w-full p-2 border rounded-lg"
+                                        placeholder="Language"
+                                    />
+                                </div>
+
+                                {/* Buttons */}
+                                <div className="mt-6 flex justify-end gap-4">
+                                    <button 
+                                        className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+                                        onClick={() => setShowEditModal(false)}
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button 
+                                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                                        onClick={() => updateBookDetails(bookToEdit)}
+                                    >
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             )}
         </div>
     );
