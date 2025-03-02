@@ -373,9 +373,32 @@ import { FiUpload, FiX } from "react-icons/fi";
             setShowEditModal(true); 
         };
         
-        const deleteBook = (bookId) => {
-            console.log("Deleting book with ID:", bookId);
-            // Call API to delete book
+        const deleteBook = async (bookId) => {
+            const token = localStorage.getItem("token");
+        
+            if (!window.confirm("Are you sure you want to delete this book?")) {
+                return; 
+            }
+        
+            try {
+                const response = await axios.post(
+                    "http://localhost:3000/api/admin/delete-book",
+                    { bookId }, 
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+        
+                if (response.status === 200) {
+                    toast.success("Book deleted successfully!");
+                    fetchBooks(userId);
+                } else {
+                    toast.error(response.data.message || "Failed to delete book.");
+                }
+            } catch (error) {
+                console.error("Error deleting book:", error);
+                toast.error(error.response?.data?.message || "Failed to delete book.");
+            }
         };
 
 
@@ -836,14 +859,14 @@ import { FiUpload, FiX } from "react-icons/fi";
                                                         Edit
                                                     </button>
                                                     <button 
-                                                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            deleteBook(book.id);
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();  
+                                                        deleteBook(book.id); 
+                                                    }}
+                                                >
+                                                    Delete
+                                                </button>
                                                 </div>
                                             )}
                                         </div>
