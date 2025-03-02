@@ -81,7 +81,8 @@ class AdminController{
 
 
         if (req.file) {
-            newCoverImagePath = `http://localhost:3000/uploads/books/${req.file.filename}`;
+            newCoverImagePath = `uploads/books/${req.file.filename}`;
+            const fullImageUrl = `http://localhost:3000/${newCoverImagePath}`;
             if (book[0].cover_image) {
                 fs.unlink(book[0].cover_image, (err) => {
                     if (err) console.error("Error deleting old image:", err);
@@ -89,7 +90,7 @@ class AdminController{
             }
     
             updateCoverImageQuery = ", cover_image = ?";
-            updateCoverImageParams.push(newCoverImagePath);
+            updateCoverImageParams.push(fullImageUrl);
         }
 
         await db.query(

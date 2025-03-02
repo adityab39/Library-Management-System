@@ -467,29 +467,27 @@ import { FiUpload, FiX } from "react-icons/fi";
         const updateBookDetails = async (updatedBook) => {
             const token = localStorage.getItem("token");
         
-            const sanitizedBook = {
-                ...updatedBook,
-                publication_year: Number(updatedBook.publication_year) || 0,
-                total_copies: Number(updatedBook.total_copies) || 0,
-                available_copies: Number(updatedBook.available_copies) || 0,
-            };
+            const formData = new FormData();
+            formData.append("title", updatedBook.title);
+            formData.append("author", updatedBook.author);
+            formData.append("category", updatedBook.category);
+            formData.append("publication_year", updatedBook.publication_year);
+            formData.append("isbn", updatedBook.isbn);
+            formData.append("language", updatedBook.language);
+            formData.append("total_copies", updatedBook.total_copies);
+            formData.append("available_copies", updatedBook.available_copies);
+            formData.append("description", updatedBook.description);
+        
+            if (updatedBook.coverImage instanceof File) {
+                formData.append("cover_image", updatedBook.coverImage);
+                console.log("📁 New image selected:", updatedBook.coverImage.name);
+            } else {
+                console.log("🔴 No new image selected. Keeping existing image.");
+            }
+        
+            console.log("📦 Sending FormData:", [...formData.entries()]);
         
             try {
-                const formData = new FormData();
-                formData.append("title", sanitizedBook.title);
-                formData.append("author", sanitizedBook.author);
-                formData.append("category", sanitizedBook.category);
-                formData.append("publication_year", sanitizedBook.publication_year);
-                formData.append("isbn", sanitizedBook.isbn);
-                formData.append("language", sanitizedBook.language);
-                formData.append("total_copies", sanitizedBook.total_copies);
-                formData.append("available_copies", sanitizedBook.available_copies);
-                formData.append("description", sanitizedBook.description);
-        
-                if (updatedBook.coverImage instanceof File) {
-                    formData.append("cover_image", updatedBook.coverImage);
-                }
-        
                 const response = await axios.put(
                     `http://localhost:3000/api/admin/update-book/${updatedBook.id}`,
                     formData,
@@ -499,12 +497,12 @@ import { FiUpload, FiX } from "react-icons/fi";
                 if (response.status === 200) {
                     toast.success("Book updated successfully!");
                     fetchBooks(userId);  
-                    setShowEditModal(false); // Close modal
+                    setShowEditModal(false); 
                 } else {
                     toast.error(response.data.message || "Failed to update book.");
                 }
             } catch (error) {
-                console.error("Error updating book:", error);
+                console.error("❌ Error updating book:", error);
                 toast.error(error.response?.data?.message || "Failed to update book.");
             }
         };
@@ -1081,17 +1079,6 @@ import { FiUpload, FiX } from "react-icons/fi";
                                 />
                                 
                                 {/* Admins Can Change the Image */}
-                                {roleId === 20 && (
-                                    <div className="mt-4">
-                                        <label className="block text-gray-700 font-medium">Change Cover Image:</label>
-                                        <input 
-                                            type="file" 
-                                            accept="image/*" 
-                                            onChange={(e) => setBookToEdit({ ...bookToEdit, cover_image: e.target.files[0] })}
-                                            className="mt-2 border p-2 rounded-lg w-full"
-                                        />
-                                    </div>
-                                )}
                             </div>
 
                             {/* Right Side - Book Details Form */}
@@ -1172,6 +1159,24 @@ import { FiUpload, FiX } from "react-icons/fi";
                                         className="w-full p-2 border rounded-lg"
                                         placeholder="Language"
                                     />
+                                    <div className="col-span-2">
+                                    <label className="block text-gray-700 mb-2">Update Cover Image:</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            if (e.target.files.length > 0) {
+                                                const selectedFile = e.target.files[0];
+                                                setBookToEdit((prev) => ({
+                                                    ...prev,
+                                                    coverImage: selectedFile, // Store file
+                                                }));
+                                                console.log("📁 File selected:", selectedFile.name);
+                                            }
+                                        }}
+                                        className="w-full p-2 border rounded-lg"
+                                    />
+                                </div>
                                 </div>
 
                                 {/* Buttons */}
