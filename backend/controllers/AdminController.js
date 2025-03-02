@@ -212,56 +212,33 @@ class AdminController{
         });
     }
 
-    static async restoreBook(req, res){
-        const bookId = req.body.bookId;
-        if (!bookId) {
-            return getResponseJson(res, 400, "Book ID is required.");
-        }
 
-        const [already_active] = await db.query("SELECT id FROM books WHERE id = ? and is_active = 1");
-
-        if(already_active.length > 0){
-            return getResponseJson(res, 400, "Book is already active.");
-        }
-
-        const [book] = await db.query("SELECT id FROM books WHERE id = ?", [bookId]);
-        if (book.length === 0) {
-            return getResponseJson(res, 404, "Book not found.");
-        }
-
-        await db.query("UPDATE books SET is_active = 1 WHERE id = ?", [bookId]);
-
-        return getResponseJson(res, 200, "Book restored successfully.");
-    }
-
-    static async getAllMembers(req,res){
+    static async getAllMembers(req, res) {
         const { page = 1, limit = 10 } = req.query; 
         const offset = (page - 1) * limit;
-
+    
         const [members] = await db.query(
-            "SELECT id, name, email, mobile, role, created_at FROM users WHERE role = 'member' LIMIT ? OFFSET ?",
+            "SELECT id, name, email, mobile, 'Member' as role, created_at FROM users WHERE role_id = '2' and is_active = 1 LIMIT ? OFFSET ?",
             [parseInt(limit), parseInt(offset)]
         );
-
-        if(members.length == 0){
-            return getResponseJson(res,400,"No members found.");
-        }
-
-        const [countResult] = await db.query("SELECT COUNT(*) as total FROM users WHERE role = 'member'");
+    
+        const [countResult] = await db.query(
+            "SELECT COUNT(*) as total FROM users WHERE role_id = '2' and is_active = 1"
+        );
         const totalMembers = countResult[0].total;
         const totalPages = Math.ceil(totalMembers / limit);
-
+    
         return getResponseJson(res, 200, "Members retrieved successfully.", {
             page,
             limit,
             totalMembers,
             totalPages,
-            members
+            members: members.length > 0 ? members : [] 
         });
     }
 
     static async deleteMember(req,res){
-        const user_id = req.body.user_id;
+        const user_id = req.body.memberId;
 
         if(!user_id){
             return getResponseJson(res,400,"Please try again");

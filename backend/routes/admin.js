@@ -10,7 +10,6 @@ router.put("/update-book/:bookId", verifyToken, upload.single("cover_image"), Ad
 router.post("/delete-book", verifyToken, AdminController.deleteBook);
 router.get("/get-books", verifyToken, AdminController.getBooks);
 router.get("/borrowed-books", verifyToken, AdminController.getBorrowedBooks);
-router.post("/restore-book", verifyToken, AdminController.restoreBook);
 router.get("/members",verifyToken,AdminController.getAllMembers);
 router.post("/delete-member",verifyToken,AdminController.deleteMember);
 router.get("/stats", verifyToken, AdminController.getLibraryStats);

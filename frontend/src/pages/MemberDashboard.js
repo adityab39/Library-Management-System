@@ -39,6 +39,7 @@ import { FiUpload, FiX } from "react-icons/fi";
         const authorRef = useRef(null);
         const [showEditModal, setShowEditModal] = useState(false);
         const [bookToEdit, setBookToEdit] = useState(null);
+        const [members, setMembers] = useState([]);
 
         const [newBook, setNewBook] = useState({
             title: "",
@@ -62,6 +63,8 @@ import { FiUpload, FiX } from "react-icons/fi";
                 fetchBorrowedBooks();
             }else if (tab === "history") {
                 fetchBorrowedHistory();
+            }else if (tab === "members" && roleId === 20) {
+                fetchMembers(1);
             }
         };
 
@@ -124,6 +127,11 @@ import { FiUpload, FiX } from "react-icons/fi";
             }
         }, [activeTab]);
 
+        useEffect(() => {
+            if (activeTab === "members" && roleId === 20) {
+                fetchMembers(1);
+            }
+        }, [activeTab]);
 
 
         const searchBooks = async (query) => {
@@ -351,6 +359,47 @@ import { FiUpload, FiX } from "react-icons/fi";
             }
         };
 
+        const fetchMembers = async () => {
+            try {
+                const token = localStorage.getItem("token");
+        
+                const response = await axios.get(
+                    "http://localhost:3000/api/admin/members?page=1&limit=10",
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+        
+                if (response.status === 200) {
+                    if (response.data.data.members.length === 0) {
+                        // No members found, update state but don't show a toast
+                        setMembers([]);
+                        return;
+                    }
+                    setMembers(response.data.data.members);
+                } else {
+                    // Only show toast for actual errors
+                    toast.error(response.data.message || "Failed to load members.");
+                }
+            } catch (error) {
+                console.error("Error fetching members:", error);
+        
+                // Check if the error response message is "No members found."
+                if (
+                    error.response &&
+                    error.response.data &&
+                    error.response.data.message === "No members found."
+                ) {
+                    // Do not show a toast for this specific message
+                    setMembers([]);
+                    return;
+                }
+        
+                // Show toast for actual failures like server errors, network errors, etc.
+                toast.error("Failed to load members.");
+            }
+        };
+
 
         const openAddBookModal = () => {
             setShowAddBookModal(true);
@@ -530,6 +579,32 @@ import { FiUpload, FiX } from "react-icons/fi";
             }
         };
 
+        const handleDeleteMember = async (memberId) => {
+            if (!window.confirm("Are you sure you want to delete this member?")) return;
+          
+            try {
+              const token = localStorage.getItem("token");
+          
+              const response = await axios.post(
+                "http://localhost:3000/api/admin/delete-member",
+                { memberId },
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+          
+              if (response.status === 200) {        
+                toast.success("Member deleted successfully!");
+                fetchMembers(1); 
+              } else {
+                toast.error(response.data.message || "Failed to delete member.");
+              }
+            } catch (error) {
+              console.error("Error deleting member:", error);
+              toast.error("Failed to delete member.");
+            }
+          };
+
     return (
         <div className="flex h-screen bg-gray-100">
             <ToastContainer />
@@ -559,6 +634,14 @@ import { FiUpload, FiX } from "react-icons/fi";
                     >
                         Borrowed History
                     </button>
+                    {roleId === 20 && (
+                    <button
+                        className={`block p-3 rounded ${activeTab === "members" ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-100"}`}
+                        onClick={() => handleTabChange("members")}
+                    >
+                        Members
+                    </button>
+                    )}
                 </nav>
             </div>
 
@@ -1023,6 +1106,64 @@ import { FiUpload, FiX } from "react-icons/fi";
                                 </tbody>
                             </table>
                         </div>
+                        </div>
+                    </div>
+                )}
+                {activeTab === "members" && roleId === 20 && (
+                    <div className="ml-64 flex-1 p-6">
+                        <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
+                        <h2 className="text-1.5xl font-semibold mb-4">Members List</h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="px-4 py-2 border text-left">Name</th>
+                                        <th className="px-4 py-2 border text-left">Email</th>
+                                        <th className="px-4 py-2 border text-left">Mobile</th>
+                                        <th className="px-4 py-2 border text-left">Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {members.length > 0 ? (
+                                        members.map((member) => (
+                                            <tr key={member.id} className="hover:bg-gray-50">
+                                                <td className="px-4 py-2 border">{member.name}</td>
+                                                <td className="px-4 py-2 border">{member.email}</td>
+                                                <td className="px-4 py-2 border">{member.mobile}</td>
+                                                <td className="px-4 py-2 border">{member.role}</td>
+                                                <td className="px-4 py-2 border text-center">
+                                                <button
+                                                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                                                onClick={() => handleDeleteMember(member.id)}
+                                                >
+                                                Delete
+                                                </button>
+                                            </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="text-center text-gray-500 py-4">No members found.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-center items-center space-x-2 mt-6">
+                            <button className={`px-4 py-2 border rounded-md ${currentPage === 1 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-200"}`} onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                                &lt; Prev
+                            </button>
+                            {[...Array(totalPages)].map((_, index) => (
+                                <button key={index + 1} className={`px-4 py-2 border rounded-md ${currentPage === index + 1 ? "bg-purple-500 text-white font-bold" : "bg-white text-gray-700 hover:bg-gray-200"}`} onClick={() => setCurrentPage(index + 1)}>
+                                    {index + 1}
+                                </button>
+                            ))}
+                            <button className={`px-4 py-2 border rounded-md ${currentPage === totalPages ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-200"}`} onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
+                                Next &gt;
+                            </button>
                         </div>
                     </div>
                 )}
