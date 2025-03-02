@@ -15,14 +15,14 @@ function ForgotPassword() {
     
             if (response.status === 200) {
                 localStorage.setItem("resetEmail", email); 
-                toast.success(response.data.message, {
-                    position: "bottom-right",
-                    autoClose: 3000, 
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                });
+                // toast.success(response.data.message, {
+                //     position: "bottom-right",
+                //     autoClose: 3000, 
+                //     hideProgressBar: true,
+                //     closeOnClick: true,
+                //     pauseOnHover: true,
+                //     draggable: true,
+                // });
     
                 navigate("/verify-otp"); 
             }

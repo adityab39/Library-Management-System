@@ -30,7 +30,7 @@ function ResetPassword() {
                 newPassword
             });
 
-            toast.success(response.data.message, { position: "bottom-right" });
+            // toast.success(response.data.message, { position: "bottom-right" });
             localStorage.removeItem("resetEmail"); // Clear stored email after successful reset
             navigate("/login");
         } catch (error) {
