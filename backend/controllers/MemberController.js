@@ -163,11 +163,11 @@ class MemberController{
                 [user_id]
             );
     
-            const totalFine = fineResult[0].total_fine || 0;
+            // const totalFine = fineResult[0].total_fine || 0;
     
-            if (totalFine > 0) {
-                return getResponseJson(res, 400, `You have an unpaid fine of $${totalFine}. Please pay before borrowing.`);
-            }
+            // if (totalFine > 0) {
+            //     return getResponseJson(res, 400, `You have an unpaid fine of $${totalFine}. Please pay before borrowing.`);
+            // }
 
             const [already_borrowed] = await db.query(
                 "SELECT id FROM borrowed_books WHERE user_id = ? and book_id = ? and returned_at is NULL",[user_id,book_id]);
