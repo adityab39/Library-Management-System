@@ -81,7 +81,7 @@ class AdminController{
 
 
         if (req.file) {
-            newCoverImagePath = `uploads/books/${req.file.filename}`;
+            newCoverImagePath = `http://localhost:3000/uploads/books/${req.file.filename}`;
             if (book[0].cover_image) {
                 fs.unlink(book[0].cover_image, (err) => {
                     if (err) console.error("Error deleting old image:", err);

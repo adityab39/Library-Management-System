@@ -466,10 +466,10 @@ import { FiUpload, FiX } from "react-icons/fi";
 
         const updateBookDetails = async (updatedBook) => {
             const token = localStorage.getItem("token");
-    
+        
             const sanitizedBook = {
                 ...updatedBook,
-                publication_year: Number(updatedBook.publication_year) || 0, 
+                publication_year: Number(updatedBook.publication_year) || 0,
                 total_copies: Number(updatedBook.total_copies) || 0,
                 available_copies: Number(updatedBook.available_copies) || 0,
             };
@@ -499,7 +499,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                 if (response.status === 200) {
                     toast.success("Book updated successfully!");
                     fetchBooks(userId);  
-                    setShowEditModal(false); 
+                    setShowEditModal(false); // Close modal
                 } else {
                     toast.error(response.data.message || "Failed to update book.");
                 }
