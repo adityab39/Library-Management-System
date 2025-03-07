@@ -63,7 +63,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                 fetchBorrowedBooks();
             }else if (tab === "history") {
                 fetchBorrowedHistory();
-            }else if (tab === "members" && roleId === 20) {
+            }else if (tab === "members") {
                 fetchMembers(1);
             }
         };
@@ -128,7 +128,7 @@ import { FiUpload, FiX } from "react-icons/fi";
         }, [activeTab]);
 
         useEffect(() => {
-            if (activeTab === "members" && roleId === 20) {
+            if (activeTab === "members") {
                 fetchMembers(1);
             }
         }, [activeTab]);
