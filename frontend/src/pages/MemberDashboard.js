@@ -65,6 +65,8 @@ import { FiUpload, FiX } from "react-icons/fi";
                 fetchBorrowedHistory();
             }else if (tab === "members") {
                 fetchMembers(1);
+            }else if (tab === "adminBorrowed") { 
+                fetchAllBorrowedBooks();
             }
         };
 
@@ -603,7 +605,22 @@ import { FiUpload, FiX } from "react-icons/fi";
               console.error("Error deleting member:", error);
               toast.error("Failed to delete member.");
             }
-          };
+        };
+
+        const fetchAllBorrowedBooks = async () => {
+            if (roleId !== 20) return; 
+        
+            try {
+                const token = localStorage.getItem("token");
+                const response = await axios.get("http://localhost:3000/api/admin/borrowed-books", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+        
+                setBorrowedBookList(response.data.data || []);
+            } catch (error) {
+                console.error("Error fetching all borrowed books:", error);
+            }
+        };
 
     return (
         <div className="flex h-screen bg-gray-100">
@@ -626,8 +643,18 @@ import { FiUpload, FiX } from "react-icons/fi";
                         className={`block p-3 rounded ${activeTab === "borrowed" ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-100"}`}
                         onClick={() => handleTabChange("borrowed")}
                     >
-                        Borrowed Books
+                        My Books
                     </button>
+
+                    {roleId === 20 && (
+                    <button
+                            className={`block p-3 rounded ${activeTab === "adminBorrowed" ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-100"}`}
+                            onClick={() => handleTabChange("adminBorrowed")}
+                        >
+                            Borrowed Books
+                        </button>
+                    )}
+
                     <button
                         className={`block p-3 rounded ${activeTab === "history" ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-100"}`}
                         onClick={() => handleTabChange("history")}
@@ -1027,7 +1054,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                 {activeTab === "borrowed" && (
                 <div className="ml-64 flex-1 p-6">
                         <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
-                        <h2 className="text-1.5xl font-semibold mb-4">Borrowed Books</h2>
+                        <h2 className="text-1.5xl font-semibold mb-4">My Books</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
                                 <thead>
@@ -1067,6 +1094,43 @@ import { FiUpload, FiX } from "react-icons/fi";
                         </div>
                     </div>
                 </div>
+                )}
+                {activeTab === "adminBorrowed" && roleId === 20 && (
+                    <div className="ml-64 flex-1 p-6">
+                        <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
+                            <h2 className="text-1.5xl font-semibold mb-4">Borrowed Books</h2>
+                            <div className="overflow-x-auto">
+                                <table className="w-full bg-white border border-gray-200 shadow-md rounded-lg">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="px-4 py-2 border text-sm text-center">Title</th>
+                                            <th className="px-4 py-2 border text-sm text-center">Author</th>
+                                            <th className="px-4 py-2 border text-sm text-center">Borrower</th>
+                                            <th className="px-4 py-2 border text-sm text-center">Due Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {borrowedBookList.length > 0 ? (
+                                            borrowedBookList.map((book) => (
+                                                <tr key={book.book_id} className="text-center">
+                                                    <td className="px-4 py-2 border">{book.title}</td>
+                                                    <td className="px-4 py-2 border">{book.author}</td>
+                                                    <td className="px-4 py-2 border">{book.borrower_name}</td>
+                                                    <td className="px-4 py-2 border">{new Date(book.due_date).toLocaleDateString()}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="4" className="text-center text-gray-500 py-4">
+                                                    No borrowed books found.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 )}
                 {activeTab === "history" && (
                     <div className="ml-64 flex-1 p-6">
