@@ -178,22 +178,17 @@ class AdminController{
             bb.due_date, 
             bb.returned_at, 
             bb.fine, 
-            bb.paid 
+            bb.paid,
+            IF(bb.returned_at IS NULL, 'Pending', 'Returned') AS status 
         FROM borrowed_books bb
         JOIN books b ON bb.book_id = b.id
         JOIN users u ON bb.user_id = u.id`;
 
         let params = [];
-        if (status === "returned") {
-            query += " WHERE bb.returned_at IS NOT NULL";
-        } else if (status === "pending") {
-            query += " WHERE bb.returned_at IS NULL";
-        }
-
         query += " LIMIT ? OFFSET ?";
         params.push(limit, offset);
 
-        const [borrowedBooks] = await db.query(query, params);
+        const [borrowedBooks] = await db.query(query,params );
 
         if (borrowedBooks.length === 0) {
             return getResponseJson(res, 404, "No borrowed books found.");

@@ -40,6 +40,9 @@ import { FiUpload, FiX } from "react-icons/fi";
         const [showEditModal, setShowEditModal] = useState(false);
         const [bookToEdit, setBookToEdit] = useState(null);
         const [members, setMembers] = useState([]);
+        const [adminBorrowedBooks, setAdminBorrowedBooks] = useState([]);
+        const [currentPageBorBooks, setCurrPage] = useState(1);
+        const [ttlPages, setTTlPages] = useState(1);
 
         const [newBook, setNewBook] = useState({
             title: "",
@@ -66,7 +69,7 @@ import { FiUpload, FiX } from "react-icons/fi";
             }else if (tab === "members") {
                 fetchMembers(1);
             }else if (tab === "adminBorrowed") { 
-                fetchAllBorrowedBooks();
+                fetchAllBorrowedBooks(1);
             }
         };
 
@@ -132,6 +135,12 @@ import { FiUpload, FiX } from "react-icons/fi";
         useEffect(() => {
             if (activeTab === "members") {
                 fetchMembers(1);
+            }
+        }, [activeTab]);
+
+        useEffect(() => {
+            if (activeTab === "adminBorrowed") {
+                fetchAllBorrowedBooks(1);
             }
         }, [activeTab]);
 
@@ -607,16 +616,18 @@ import { FiUpload, FiX } from "react-icons/fi";
             }
         };
 
-        const fetchAllBorrowedBooks = async () => {
+        const fetchAllBorrowedBooks = async (page = 1) => {
             if (roleId !== 20) return; 
         
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:3000/api/admin/borrowed-books", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-        
-                setBorrowedBookList(response.data.data || []);
+                const response = await axios.get(
+                    `http://localhost:3000/api/admin/borrowed-books?page=${page}&limit=10`, 
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setTTlPages(response.data.data.totalPages); 
+                setCurrPage(page); 
+                setAdminBorrowedBooks(response.data.data.borrowedBooks || []);
             } catch (error) {
                 console.error("Error fetching all borrowed books:", error);
             }
@@ -1095,7 +1106,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                     </div>
                 </div>
                 )}
-                {activeTab === "adminBorrowed" && roleId === 20 && (
+                {activeTab === "adminBorrowed" && roleId === 20  && (
                     <div className="ml-64 flex-1 p-6">
                         <div className="p-6 bg-white shadow-md rounded-lg mx-6 mt-20">
                             <h2 className="text-1.5xl font-semibold mb-4">Borrowed Books</h2>
@@ -1110,13 +1121,17 @@ import { FiUpload, FiX } from "react-icons/fi";
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {borrowedBookList.length > 0 ? (
-                                            borrowedBookList.map((book) => (
-                                                <tr key={book.book_id} className="text-center">
+                                        {adminBorrowedBooks.length > 0 ? (
+                                            adminBorrowedBooks.map((book) => (
+                                                <tr key={book.borrowed_id} className="text-center">
                                                     <td className="px-4 py-2 border">{book.title}</td>
                                                     <td className="px-4 py-2 border">{book.author}</td>
-                                                    <td className="px-4 py-2 border">{book.borrower_name}</td>
+                                                    <td className="px-4 py-2 border">{book.member_name}</td>
                                                     <td className="px-4 py-2 border">{new Date(book.due_date).toLocaleDateString()}</td>
+                                                    <td className={`px-4 py-2 border font-semibold 
+                                                    ${book.status === "Returned" ? "text-green-600" : "text-red-600"}`}>
+                                                    {book.status}
+                                                </td>
                                                 </tr>
                                             ))
                                         ) : (
@@ -1128,6 +1143,40 @@ import { FiUpload, FiX } from "react-icons/fi";
                                         )}
                                     </tbody>
                                 </table>
+                            </div>
+                             {/* Pagination Controls */}
+                            <div className="flex justify-center items-center space-x-2 mt-6">
+                                <button
+                                    className={`px-4 py-2 border rounded-md ${
+                                        currentPageBorBooks === 1 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-200"
+                                    }`}
+                                    onClick={() => fetchAllBorrowedBooks(currentPageBorBooks - 1)}
+                                    disabled={currentPageBorBooks === 1}
+                                >
+                                    &lt; Prev
+                                </button>
+
+                                {[...Array(ttlPages)].map((_, index) => (
+                                    <button
+                                        key={index + 1}
+                                        className={`px-4 py-2 border rounded-md ${
+                                            currentPageBorBooks === index + 1 ? "bg-purple-500 text-white font-bold" : "bg-white text-gray-700 hover:bg-gray-200"
+                                        }`}
+                                        onClick={() => fetchAllBorrowedBooks(index + 1)}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+
+                                <button
+                                    className={`px-4 py-2 border rounded-md ${
+                                        currentPageBorBooks === ttlPages ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-white text-gray-700 hover:bg-gray-200"
+                                    }`}
+                                    onClick={() => fetchAllBorrowedBooks(currentPageBorBooks + 1)}
+                                    disabled={currentPageBorBooks === ttlPages}
+                                >
+                                    Next &gt;
+                                </button>
                             </div>
                         </div>
                     </div>
