@@ -284,7 +284,7 @@ class MemberController{
              ORDER BY bb.borrowed_at DESC `,[user_id]);
         
         if(history.length == 0){
-            return getResponseJson(res,400,"No borrowing history");
+            return getResponseJson(res,200,"No borrowing history");
         }
 
         return getResponseJson(res,200,"Borrowing history retrieved successfully.",history);

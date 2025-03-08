@@ -617,8 +617,6 @@ import { FiUpload, FiX } from "react-icons/fi";
         };
 
         const fetchAllBorrowedBooks = async (page = 1) => {
-            if (roleId !== 20) return; 
-        
             try {
                 const token = localStorage.getItem("token");
                 const response = await axios.get(
