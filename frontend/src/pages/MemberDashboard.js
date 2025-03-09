@@ -271,6 +271,7 @@ import { FiUpload, FiX } from "react-icons/fi";
         };
 
         const openBookDetails = (book) => {
+            setShowEditModal(false); 
             setShowCategoryDropdown(false); 
             setShowAuthorDropdown(false); 
             setSelectedBook(book);
@@ -408,6 +409,7 @@ import { FiUpload, FiX } from "react-icons/fi";
 
 
         const openAddBookModal = () => {
+            setShowEditModal(false); 
             setShowCategoryDropdown(false);
             setShowAuthorDropdown(false); 
             setShowAddBookModal(true);
