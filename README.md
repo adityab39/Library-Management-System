@@ -4,6 +4,13 @@
 
 The **Library Management System** is a web-based application designed to manage books, users, and borrowing activities efficiently. The system provides different functionalities for **members** and **administrators**.
 
+### General Requirements
+- **Node.js** (Latest LTS version recommended) – [Download here](https://nodejs.org/)
+- **NPM** (Comes with Node.js) 
+- **Git** (Version control system) – [Download here](https://git-scm.com/)
+- **MySQL** 
+
+
 ## Features
 
 ### Member Features
