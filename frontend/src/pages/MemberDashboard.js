@@ -385,36 +385,31 @@ import { FiUpload, FiX } from "react-icons/fi";
         
                 if (response.status === 200) {
                     if (response.data.data.members.length === 0) {
-                        // No members found, update state but don't show a toast
                         setMembers([]);
                         return;
                     }
                     setMembers(response.data.data.members);
                 } else {
-                    // Only show toast for actual errors
                     toast.error(response.data.message || "Failed to load members.");
                 }
             } catch (error) {
                 console.error("Error fetching members:", error);
-        
-                // Check if the error response message is "No members found."
                 if (
                     error.response &&
                     error.response.data &&
                     error.response.data.message === "No members found."
                 ) {
-                    // Do not show a toast for this specific message
                     setMembers([]);
                     return;
                 }
-        
-                // Show toast for actual failures like server errors, network errors, etc.
                 toast.error("Failed to load members.");
             }
         };
 
 
         const openAddBookModal = () => {
+            setShowCategoryDropdown(false);
+            setShowAuthorDropdown(false); 
             setShowAddBookModal(true);
         };
 
