@@ -144,7 +144,6 @@ import { FiUpload, FiX } from "react-icons/fi";
             }
         }, [activeTab]);
 
-
         const searchBooks = async (query) => {
             if (!query.trim()) {
                 fetchBooks(userId); 
@@ -271,7 +270,7 @@ import { FiUpload, FiX } from "react-icons/fi";
         };
 
         const openBookDetails = (book) => {
-            setShowEditModal(false); 
+            setMenuOpen(null); 
             setShowCategoryDropdown(false); 
             setShowAuthorDropdown(false); 
             setSelectedBook(book);
@@ -409,7 +408,7 @@ import { FiUpload, FiX } from "react-icons/fi";
 
 
         const openAddBookModal = () => {
-            setShowEditModal(false); 
+            setMenuOpen(null); 
             setShowCategoryDropdown(false);
             setShowAuthorDropdown(false); 
             setShowAddBookModal(true);
@@ -886,7 +885,12 @@ import { FiUpload, FiX } from "react-icons/fi";
                         <div className="relative" ref={categoryRef} >
                         <button 
                             className="px-4 py-2 border rounded-md text-gray-700 bg-white"
-                            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowCategoryDropdown(!showCategoryDropdown);
+                                setShowAuthorDropdown(false); 
+                                setMenuOpen(null); 
+                            }} 
                         >
                             Categories
                         </button>
@@ -913,7 +917,12 @@ import { FiUpload, FiX } from "react-icons/fi";
                         <div className="relative" ref={authorRef} >
                             <button 
                                 className="px-4 py-2 border rounded-md text-gray-700 bg-white"
-                                onClick={() => setShowAuthorDropdown(!showAuthorDropdown)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowAuthorDropdown(!showAuthorDropdown);
+                                    setShowCategoryDropdown(false); 
+                                    setMenuOpen(null); 
+                                }} 
                             >
                                 Authors
                             </button>
@@ -956,7 +965,9 @@ import { FiUpload, FiX } from "react-icons/fi";
                                             {/* Three Dots Button */}
                                             <button 
                                                 onClick={(e) => {
-                                                    e.stopPropagation(); // Prevent immediate closing
+                                                    e.stopPropagation();
+                                                    setShowCategoryDropdown(false); 
+                                                    setShowAuthorDropdown(false);
                                                     setMenuOpen(menuOpen === book.id ? null : book.id);
                                                 }} 
                                                 className="text-gray-700 hover:text-gray-900 text-2xl p-1 rounded-full focus:outline-none"
@@ -971,7 +982,10 @@ import { FiUpload, FiX } from "react-icons/fi";
                                                         className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            setShowCategoryDropdown(false); 
+                                                            setShowAuthorDropdown(false);
                                                             editBook(book);
+                                                            setMenuOpen(null); 
                                                         }}
                                                     >
                                                         Edit
