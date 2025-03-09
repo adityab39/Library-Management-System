@@ -54,3 +54,8 @@ To run this project locally, follow these steps:
 ```bash
 git clone https://github.com/adityab39/library-management-system.git
 cd library-management-system
+
+### 2.Install Dependencies (Once inside project directories)
+Run:
+```bash
+npm install
