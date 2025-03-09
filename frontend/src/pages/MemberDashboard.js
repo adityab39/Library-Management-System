@@ -271,6 +271,8 @@ import { FiUpload, FiX } from "react-icons/fi";
         };
 
         const openBookDetails = (book) => {
+            setShowCategoryDropdown(false); 
+            setShowAuthorDropdown(false); 
             setSelectedBook(book);
             setShowModal(true);
         };
@@ -370,12 +372,12 @@ import { FiUpload, FiX } from "react-icons/fi";
             }
         };
 
-        const fetchMembers = async () => {
+        const fetchMembers = async (page = 1) => {
             try {
                 const token = localStorage.getItem("token");
         
                 const response = await axios.get(
-                    "http://localhost:3000/api/admin/members?page=1&limit=10",
+                    `http://localhost:3000/api/admin/members?page=${page}&limit=10`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -383,6 +385,7 @@ import { FiUpload, FiX } from "react-icons/fi";
         
                 if (response.status === 200) {
                     if (response.data.data.members.length === 0) {
+                        // No members found, update state but don't show a toast
                         setMembers([]);
                         return;
                     }
