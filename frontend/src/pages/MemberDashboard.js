@@ -383,7 +383,6 @@ import { FiUpload, FiX } from "react-icons/fi";
         
                 if (response.status === 200) {
                     if (response.data.data.members.length === 0) {
-                        // No members found, update state but don't show a toast
                         setMembers([]);
                         return;
                     }
