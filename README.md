@@ -5,6 +5,22 @@
 
 The **Library Management System** is a web-based application designed to manage books, users, and borrowing activities efficiently. The system provides different functionalities for **members** and **administrators**.
 
+## 📽️ Demo Videos
+
+Watch the feature demonstrations:
+
+### 🔹 User Registration
+[![User Registration](demos/user_registration.png)](demos/user_registration.mov)
+
+### 🔹 Admin Functionality
+[![Admin Functionality](demos/admin_functionality.png)](demos/admin_functionality.mov)
+
+### 🔹 Member Functionality
+[![Member Functionality](demos/member_functionality.png)](demos/member_functionality.mov)
+
+### 🔹 Forgot Password
+[![Forgot Password](demos/forgot_password.png)](demos/forgot_password.mov)
+
 ### General Requirements
 - **Node.js** (Latest LTS version recommended) – [Download here](https://nodejs.org/)
 - **NPM** (Comes with Node.js) 
