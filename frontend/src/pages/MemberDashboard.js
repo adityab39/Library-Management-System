@@ -577,7 +577,19 @@ import { FiUpload, FiX } from "react-icons/fi";
         
                 if (response.status === 200) {
                     toast.success("Book updated successfully!");
-                    fetchBooks(userId);  
+                    fetchBooks(userId);
+
+                    // Step 2: Wait for 1.5 seconds before updating image
+                    setTimeout(() => {
+                        setBooks((prevBooks) =>
+                            prevBooks.map((b) =>
+                                b.id === updatedBook.id
+                                    ? { ...b, cover_image: `${updatedBook.cover_image}?t=${new Date().getTime()}` }
+                                    : b
+                            )
+                        );
+                    }, 1500); // 1.5-second delay
+                    
                     setShowEditModal(false); 
                 } else {
                     toast.error(response.data.message || "Failed to update book.");
