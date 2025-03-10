@@ -10,16 +10,16 @@ The **Library Management System** is a web-based application designed to manage 
 Watch the feature demonstrations:
 
 ### 🔹 User Registration
-[![User Registration](demos/user_registration.png)](demos/user_registration.mov)
+[![User Registration](demos/user_registration)](demos/UserRegistration.mp4)
 
 ### 🔹 Admin Functionality
-[![Admin Functionality](demos/admin_functionality.png)](demos/admin_functionality.mov)
+[![Admin Functionality](demos/admin_functionality)](demos/AdminFunctionality.mp4)
 
 ### 🔹 Member Functionality
-[![Member Functionality](demos/member_functionality.png)](demos/member_functionality.mov)
+[![Member Functionality](demos/member_functionality)](demos/MemberFunctionality.mp4)
 
 ### 🔹 Forgot Password
-[![Forgot Password](demos/forgot_password.png)](demos/forgot_password.mov)
+[![Forgot Password](demos/forgot_password)](demos/ForgotPasswrod.mp4)
 
 ### General Requirements
 - **Node.js** (Latest LTS version recommended) – [Download here](https://nodejs.org/)
