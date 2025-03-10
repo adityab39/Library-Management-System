@@ -10,10 +10,10 @@ The **Library Management System** is a web-based application designed to manage 
 Watch the feature demonstrations:
 
 ### 🔹 User Registration
-[![User Registration](https://github.com/user-attachments/assets/6c424e96-7289-4f63-90aa-ae9e343cd219)
+https://github.com/user-attachments/assets/6c424e96-7289-4f63-90aa-ae9e343cd219
 
 ### 🔹 Admin Functionality
-[![Admin Functionality](https://github.com/user-attachments/assets/7eb80436-2745-448e-a2e3-cca784cec627)
+https://github.com/user-attachments/assets/7eb80436-2745-448e-a2e3-cca784cec627
 
 ### 🔹 Member Functionality
 [![Member Functionality](https://github.com/user-attachments/assets/cd5437ae-2cf2-4d19-b7a8-c6a4e2c5e1ad)
