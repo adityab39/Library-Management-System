@@ -22,7 +22,7 @@ class AdminController{
         }
 
 
-        const [existingBook] = await db.query("SELECT id FROM books WHERE isbn = ?", [isbn]);
+        const [existingBook] = await db.query("SELECT id FROM books WHERE isbn = ? and is_active = 1", [isbn]);
         if (existingBook.length > 0) {
             return getResponseJson(res, 400, "A book with this ISBN already exists.");
         }
