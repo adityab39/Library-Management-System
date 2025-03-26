@@ -302,7 +302,6 @@ import { FiUpload, FiX } from "react-icons/fi";
                     }
                 );
         
-                // Check if status code is 200 (Success)
                 if (response.status === 200) {
                     toast.success(response.data.message, { position: "top-right" });
                     setUserRating(rating);
@@ -318,8 +317,6 @@ import { FiUpload, FiX } from "react-icons/fi";
         
             } catch (error) {
                 console.error("Error submitting review:", error);
-                
-                // Display error message if available, otherwise show a generic error
                 const errorMessage = error.response?.data?.message || "Failed to submit review";
                 toast.error(errorMessage, { position: "top-right" });
             }
@@ -353,7 +350,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                 );
         
                 toast.success(response.data.message, { position: "top-right" });
-                fetchBorrowedBooks(); // Refresh the table after returning the book
+                fetchBorrowedBooks();
             } catch (error) {
                 console.error("Error returning book:", error);
                 toast.error("Failed to return book", { position: "top-right" });
@@ -461,14 +458,13 @@ import { FiUpload, FiX } from "react-icons/fi";
 
 
         const addBook = async () => {
-            const token = localStorage.getItem("token"); // Get the Bearer Token once
+            const token = localStorage.getItem("token");
         
             if (!token) {
                 alert("Unauthorized! Please log in again.");
                 return;
             }
         
-            // Check if all fields are filled
             if (!newBook.title || !newBook.author || !newBook.category || !newBook.publicationYear ||
                 !newBook.isbn || !newBook.language || !newBook.totalCopies || !newBook.availableCopies ||
                 !newBook.description || !newBook.coverImage) {
@@ -488,13 +484,13 @@ import { FiUpload, FiX } from "react-icons/fi";
             formData.append("description", newBook.description);
             
             if (newBook.coverImage instanceof File) {
-                formData.append("cover_image", newBook.coverImage); // Attach the file
+                formData.append("cover_image", newBook.coverImage);
             } else {
                 toast.error("Please upload a valid image file!", { position: "top-right" });
                 return;
             }
         
-            console.log("Sending FormData:", formData.get("cover_image")); // Debugging
+            console.log("Sending FormData:", formData.get("cover_image"));
         
             try {
                 const response = await axios.post("http://localhost:3000/api/admin/add-book", formData, {
@@ -519,23 +515,20 @@ import { FiUpload, FiX } from "react-icons/fi";
                         coverImage: null,
                     });
 
-                    fetchBooks(); // Refresh book list
-                    setShowAddBookModal(false); // Close modal
+                    fetchBooks(); 
+                    setShowAddBookModal(false); 
                 }
             } catch (error) {
                 console.error("Error adding book:", error);
                 if (error.response) {
                     const { status, data } = error.response;
         
-                    // If status code is 500, show "Error adding book"
                     if (status === 500) {
                         toast.error("Error adding book", { position: "top-right" });
                     } 
-                    // If status code is 400, show the error message from response
                     else if (status === 400) {
                         toast.error(data.message || "Invalid request", { position: "top-right" });
                     } 
-                    // Handle other errors
                     else {
                         toast.error("Failed to add book", { position: "top-right" });
                     }
@@ -578,8 +571,6 @@ import { FiUpload, FiX } from "react-icons/fi";
                 if (response.status === 200) {
                     toast.success("Book updated successfully!");
                     fetchBooks(userId);
-
-                    // Step 2: Wait for 1.5 seconds before updating image
                     setTimeout(() => {
                         setBooks((prevBooks) =>
                             prevBooks.map((b) =>
@@ -588,7 +579,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                                     : b
                             )
                         );
-                    }, 1500); // 1.5-second delay
+                    }, 1500); 
                     
                     setShowEditModal(false); 
                 } else {
@@ -1469,7 +1460,7 @@ import { FiUpload, FiX } from "react-icons/fi";
                                                 const selectedFile = e.target.files[0];
                                                 setBookToEdit((prev) => ({
                                                     ...prev,
-                                                    coverImage: selectedFile, // Store file
+                                                    coverImage: selectedFile, 
                                                 }));
                                                 console.log("📁 File selected:", selectedFile.name);
                                             }
